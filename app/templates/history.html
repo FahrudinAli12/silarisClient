@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+
+
+<html lang="id">
+
+
+<head>
+
+
+  <meta charset="UTF-8" />
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+
+  <title>History - Client Checking & Laundry Linen RS</title>
+
+
+  <link rel="stylesheet" href="/static/styles.css?v=34" />
+
+
+</head>
+
+
+<body>
+
+
+  <div class="app-shell">
+
+
+    <nav class="top-nav">
+
+
+      <div class="brand">
+
+
+        <span class="brand-mark">âœš</span>
+
+
+        <div>
+
+
+          <strong>Client Checking</strong>
+
+
+          <small>Hospital Linen System</small>
+
+
+        </div>
+
+
+      </div>
+
+
+      <div class="nav-links">
+
+
+        <a href="/dashboard">Dashboard</a>
+
+
+        <a href="/master-data">Master Data</a>
+
+
+        <a href="/laundry">Laundry</a>
+
+
+        <a class="active" href="/history">History</a>
+
+
+        <a href="/settings">Settings</a>
+
+
+      </div>
+
+
+      <div class="rfid-port-widget">
+
+
+        <label for="rfid-port-select">Port Reader:</label>
+
+
+        <div class="custom-dropdown port-dropdown" id="dropdown-port" tabindex="0">
+
+
+              <div class="dropdown-selected">COM3</div>
+
+
+              <div class="dropdown-options" id="dropdown-port-options">
+
+
+                <div class="dropdown-option selected" data-value="COM3">COM3</div>
+
+
+              </div>
+
+
+            </div>
+
+
+            <input type="hidden" id="rfid-port-select" value="COM3" />
+
+
+        <span id="rfid-status-badge" class="badge-disconnected"><span class="led-dot"></span>DISCONNECTED</span>
+
+
+      </div>
+
+
+    </nav>
+
+
+
+
+
+    <header class="page-hero">
+
+
+      <div>
+
+
+        <p class="eyebrow">Audit & Riwayat</p>
+
+
+        <h1>Riwayat Transaksi Linen</h1>
+
+
+        <p>Telusuri setiap pergerakan linen dan pastikan setiap aktivitas tercatat dengan jelas untuk kebutuhan audit rumah sakit.</p>
+
+
+      </div>
+
+
+      <div class="hero-badge">Traceable • Auditable</div>
+
+
+    </header>
+
+
+
+
+
+    <section class="card">
+
+
+      <h2>Log Riwayat</h2>
+
+
+      <div class="table-wrap">
+
+
+        <table>
+
+
+          <thead><tr><th>Waktu</th><th>Event</th><th>Lokasi Sebelum</th><th>Lokasi Sesudah</th></tr></thead>
+
+
+          <tbody id="history-table-body"></tbody>
+
+
+        </table>
+
+
+      </div>
+
+
+    </section>
+
+
+  </div>
+
+
+  <script src="/static/app_core.js?v=72"></script>
+
+
+</body>
+
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

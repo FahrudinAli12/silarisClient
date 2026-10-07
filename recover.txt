@@ -1,0 +1,244 @@
+    .sidebar {
+      background-color: #061426 !important;
+    }
+    .sidebar.collapsed .sidebar-reader-box { display: none !important; }
+    .sidebar-brand { border-bottom: none !important; }
+
+    .hero-banner {
+      background: #061426;
+      border: 1px solid #173554;
+      border-radius: 12px; padding: 16px 24px; 
+      display: flex; justify-content: space-between; align-items: center; 
+      position: relative; margin-bottom: 12px; min-height: 110px; overflow: hidden;
+    }
+    .hero-img-box {
+      position: absolute; right: 0; top: -20px; bottom: -20px; width: 500px;
+      background: url('/static/images/banner_dashboard.png') no-repeat center right;
+      background-size: cover;
+      opacity: 0.85;
+      filter: contrast(1.1) brightness(0.9);
+      z-index: 1; 
+      mask-image: linear-gradient(to left, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%); 
+      -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+      pointer-events: none;
+    }
+    .hero-text-box { z-index: 2; max-width: 65%; display: flex; flex-direction: column; gap: 4px; }
+    .hero-eyebrow { color: #8297b0; font-size: 0.6rem; letter-spacing: 0.15em; font-weight: 700; text-transform: uppercase; }
+    .hero-title { font-size: 1.3rem; font-weight: 800; color: #fff; line-height: 1.2; letter-spacing: -0.01em; white-space: nowrap; margin: 0; }
+    .hero-desc { color: #8297b0; font-size: 0.8rem; line-height: 1.4; max-width: 100%; font-weight: 400; margin: 2px 0 0 0; }
+    .hero-badge {
+      position: relative; z-index: 3;
+      background: transparent; border: 1px solid #165b75; color: #fff; 
+      padding: 6px 16px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; 
+      backdrop-filter: blur(8px); margin-right: 12px;
+    }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px; }
+    .stat-card {
+      background: #0B2038; border: 1px solid #173554; 
+      border-radius: 12px; padding: 14px 20px; display: flex; align-items: center; gap: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-2px); }
+    .stat-icon-circle {
+      width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .stat-label { display: block; color: #8297b0; font-size: 0.85rem; margin-bottom: 4px; font-weight: 500; }
+    .stat-value { display: block; font-size: 1.6rem; color: #fff; line-height: 1; font-weight: 700; }
+    .middle-dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch; height: 260px; max-height: 260px; }
+    .activity-section { margin-top: 16px; }
+    .card { background: #0B2038; border: 1px solid #173554; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); box-sizing: border-box; position: relative; }
+    .live-scan-card { height: 260px; max-height: 260px; padding: 5px 16px; display: flex; flex-direction: column; overflow: hidden; margin: 0; }
+    .summary-card { height: 260px; max-height: 260px; display: flex; align-items: center; justify-content: center; padding: 16px; overflow: hidden; margin: 0; }
+    .activity-card { height: 110px; max-height: 110px; display: flex; flex-direction: column; justify-content: flex-end; padding: 16px; overflow: hidden; margin: 0; }
+    
+    .card-title { font-size: 1.1rem; font-weight: 600; color: #fff; display: flex; align-items: center; gap: 8px; margin: 0; }
+    
+    .donut-chart-container { display: flex; align-items: center; justify-content: center; gap: 40px; width: 100%; flex: 1; }
+    .donut-chart {
+      position: relative; width: 150px; height: 150px; border-radius: 50%;
+      background: #173554;
+      display: flex; align-items: center; justify-content: center; box-shadow: 0 0 24px rgba(0,0,0,0.3); flex-shrink: 0;
+    }
+    .donut-hole {
+      width: 100px; height: 100px; border-radius: 50%; background: #0B2038;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .donut-legend { display: flex; flex-direction: column; gap: 12px; flex: 1; }
+    .legend-item { display: flex; align-items: center; justify-content: space-between; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
+    .legend-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .legend-label { display: flex; align-items: center; gap: 8px; color: #fff; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .legend-value { color: #8297b0; }
+    
+    .activity-list { display: flex; gap: 16px; overflow-x: hidden; width: 100%; }
+    .activity-item {
+      flex: 1; min-width: 0; background: rgba(255,255,255,0.02); border: 1px solid #173554;
+      border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+    }
+    .activity-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .activity-text { font-size: 0.8rem; color: #e6f0fa; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .activity-time { font-size: 0.7rem; color: #8297b0; margin-top: 4px; display: block; }
+    
+    .epc-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .epc-table th { text-align: left; padding: 0 16px; height: 24px; color: #8297b0; font-weight: 600; border-bottom: 1px solid #173554; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .epc-table td { padding: 0 16px; height: 27px; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.02); }
+    .epc-table tr { height: 27px; }
+    .epc-table tr:nth-child(even) td { background: rgba(255,255,255,0.01); }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- SIDEBAR GLOBAL -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon-box">
+          <svg class="brand-cross" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M19 10.5h-5.5V5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v5.5H5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5h5.5V19c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-5.5H19c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5z" />
+          </svg>
+        </div>
+        <div class="brand-text">
+          <strong>Client Checking</strong>
+          <small>HOSPITAL LINEN SYSTEM</small>
+        </div>
+      </div>
+
+      <div class="sidebar-menu-label">MENU</div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard" class="nav-item active">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+
+        <div class="nav-group">
+          <div class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span>Master Data</span>
+            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+          <div class="nav-sub">
+            <a href="/master-data/linen" class="sub-item">• Data Linen</a>
+            <a href="/master-data/ruangan" class="sub-item">• Data Ruangan</a>
+          </div>
+        </div>
+
+        <div class="nav-group">
+          <a href="/laundry" class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path
+                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+              </path>
+            </svg>
+            <span>Laundry</span>
+            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </a>
+          <div class="nav-sub">
+            <a href="/laundry?tab=masuk" class="sub-item" id="sub-nav-masuk">• Linen Masuk</a>
+            <a href="/laundry?tab=keluar" class="sub-item" id="sub-nav-keluar">• Linen Keluar</a>
+            <a href="/laundry?tab=history" class="sub-item" id="sub-nav-history">• History Linen</a>
+          </div>
+        </div>
+
+        <div class="nav-group">
+          <a href="/settings" class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+              </path>
+            </svg>
+            <span>Settings</span>
+            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </a>
+          <div class="nav-sub">
+            <a href="/settings?tab=sync" class="sub-item" id="sub-nav-sync">• Sync Data</a>
+            <a href="/settings?tab=log" class="sub-item" id="sub-nav-log">• Log Penerimaan Linen</a>
+          </div>
+        </div>
+      </nav>
+
+      <!-- SIDEBAR READER WIDGET -->
+      <div class="sidebar-reader-box">
+        <div class="sidebar-reader-title">Reader Status</div>
+        <div class="sidebar-reader-status">
+          <span id="rfid-status-badge" class="badge-disconnected">
+            <span class="led-dot"></span>DISCONNECTED
+          </span>
+        </div>
+        <div class="sidebar-reader-info">
+          <div class="info-row"><span>Port</span><strong id="sidebar-port-name">COM3</strong></div>
+          <div class="info-row"><span>Last Sync</span><strong id="sidebar-last-sync">01/06/2026 20:38:21</strong></div>
+        </div>
+        <button type="button" class="btn-test-connection" id="btn-test-connection">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+            <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+            <line x1="12" y1="20" x2="12.01" y2="20"></line>
+          </svg>
+          Test Connection
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN AREA -->
+    <div class="main-wrapper">
+      <!-- HEADER GLOBAL -->
+      <header class="top-header">
+        <div class="header-left">
+          <button type="button" class="btn-hamburger" id="btn-sidebar-toggle" title="Toggle Sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+          <div class="header-title-box">
+            <h1 class="header-title">Dashboard</h1>
+            <p class="header-subtitle">Monitor aktivitas linen secara real-time</p>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <div class="port-reader-box">
+            <label for="rfid-port-select">Port Reader :</label>
+            <div class="custom-dropdown port-dropdown" id="dropdown-port" tabindex="0">
+              <div class="dropdown-selected">COM3</div>
+              <div class="dropdown-options" id="dropdown-port-options">
+                <div class="dropdown-option selected" data-value="COM3">COM3</div>
+              </div>
+            </div>
+            <input type="hidden" id="rfid-port-select" value="COM3" />
+          </div>
+
+          <div class="header-status-badge">
+            <span class="badge-connected"><span class="led-dot"></span>CONNECTED</span>
+          </div>
+
+          <button type="button" class="header-icon-btn" title="Notifikasi">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <span class="notification-dot">3</span>
+          </button>
+
+          <div class="user-avatar" title="Administrator">A</div>
+        </div>
+      </header>
+
+      <!-- PAGE CONTENT -->
+      <main class="dashboard-content" style="padding: 12px 16px 12px 16px; display: flex; flex-direction: column; height: 100vh; max-height: 100vh; overflow: hidden;">
+        
+        <!-- Hero Banner -->
+        <section class="hero-banner">

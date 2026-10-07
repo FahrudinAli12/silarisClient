@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+
+
+<html lang="id">
+
+
+<head>
+
+
+  <meta charset="UTF-8" />
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+
+  <title>Master Data - Client Checking & Laundry Linen RS</title>
+
+
+  <link rel="stylesheet" href="/static/styles.css?v=34" />
+
+
+</head>
+
+
+<body>
+
+
+  <div class="app-layout">
+
+
+
+
+
+    <!-- SIDEBAR GLOBAL -->
+
+
+    <aside class="sidebar" id="sidebar">
+
+
+      <div class="sidebar-brand">
+
+
+        <div class="brand-icon-box">
+
+
+          <svg class="brand-cross" viewBox="0 0 24 24" fill="currentColor">
+
+
+            <path
+
+
+              d="M19 10.5h-5.5V5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v5.5H5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5h5.5V19c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-5.5H19c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5z" />
+
+
+          </svg>
+
+
+        </div>
+
+
+        <div class="brand-text">
+
+
+          <strong>Client Checking</strong>
+
+
+          <small>HOSPITAL LINEN SYSTEM</small>
+
+
+        </div>
+
+
+      </div>
+
+
+
+
+
+      <div class="sidebar-menu-label">MENU</div>
+
+
+      <nav class="sidebar-nav">
+
+
+        <a href="/dashboard" class="nav-item">
+
+
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+
+            <rect x="3" y="3" width="7" height="7"></rect>
+
+
+            <rect x="14" y="3" width="7" height="7"></rect>
+
+
+            <rect x="14" y="14" width="7" height="7"></rect>
+
+
+            <rect x="3" y="14" width="7" height="7"></rect>
+
+
+          </svg>
+
+
+          <span>Dashboard</span>
+
+
+        </a>
+
+
+
+
+
+        <div class="nav-group open">
+
+
+          <div class="nav-item active">
+
+
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+
+
+              <polyline points="14 2 14 8 20 8"></polyline>
+
+
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+
+
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+
+
+            </svg>
+
+
+            <span>Master Data</span>
+
+
+            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+
+              <polyline points="6 9 12 15 18 9"></polyline>
+
+
+            </svg>
+
+
+          </div>
+
+
+          <div class="nav-sub">
+
+
+            <a href="/master-data/linen" class="sub-item">• Data Linen</a>
+
+
+            <a href="/master-data/ruangan" class="sub-item">• Data Ruangan</a>
+
+
+          </div>
+
+
+        </div>
+
+
+
+
+
+        <div class="nav-group">
+
+
+          <a href="/laundry" class="nav-item">
+
+
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+
+              <path
+
+
+                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+
+
+              </path>
+
+
+            </svg>
+
+
+            <span>Laundry</span>
+
+
+            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+
+              <polyline points="6 9 12 15 18 9"></polyline>
+
+
+            </svg>
+
+
+          </a>
+
+
+          <div class="nav-sub">
+
+
+            <a href="/laundry?tab=masuk" class="sub-item" id="sub-nav-masuk">• Linen Masuk</a>
+
+
+            <a href="/laundry?tab=keluar" class="sub-item" id="sub-nav-keluar">• Linen Keluar</a>
+
+
+            <a href="/laundry?tab=history" class="sub-item" id="sub-nav-history">• History Linen</a>
+
+
+          </div>
+
+
+        </div>
+
+
+
+
+
+        <div class="nav-group">
+
+
+          <a href="/settings" class="nav-item">
+
+
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+
+              <circle cx="12" cy="12" r="3"></circle>
+
+
+              <path
+
+
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+
+
+              </path>
+
+
+            </svg>
+
+
+            <span>Settings</span>
+
+
+            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+
+              <polyline points="6 9 12 15 18 9"></polyline>
+
+
+            </svg>
+
+
+          </a>
+
+
+          <div class="nav-sub">
+
+
+            <a href="/settings?tab=sync" class="sub-item" id="sub-nav-sync">• Sync Data</a>
+
+
+            <a href="/settings?tab=log" class="sub-item" id="sub-nav-log">• Log Penerimaan Linen</a>
+
+
+
+
+
+          </div>
+
+
+        </div>
+
+
+      </nav>
+
+
+
+
+
+      <!-- SIDEBAR READER WIDGET -->
+
+
+      <div class="sidebar-reader-box">
+
+
+        <div class="sidebar-reader-title">Reader Status</div>
+
+
+        <div class="sidebar-reader-status">
+
+
+          <span id="rfid-status-badge" class="badge-disconnected">
+
+
+            <span class="led-dot"></span>DISCONNECTED
+
+
+          </span>
+
+
+        </div>
+
+
+        <div class="sidebar-reader-info">
+
+
+                    <div class="info-row"><span>Mode</span><strong id="sidebar-mode-name">Single Reader Mode</strong></div>
+                    <div class="info-row"><span>Active Scanner</span><strong id="sidebar-active-scanner" style="color: #00D084;">COM3 - Linen Masuk</strong></div>
+          <div class="info-row"><span>Port</span><strong id="sidebar-port-name">COM3</strong></div>
+
+
+          <div class="info-row"><span>Last Sync</span><strong id="sidebar-last-sync">01/06/2026 20:38:21</strong></div>
+
+
+        </div>
+
+
+        <button type="button" class="btn-test-connection" id="btn-test-connection">
+
+
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+
+            <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+
+
+            <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+
+
+            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+
+
+            <line x1="12" y1="20" x2="12.01" y2="20"></line>
+
+
+          </svg>
+
+
+          Test Connection
+
+
+        </button>
+
+
+      </div>
+
+
+    </aside>
+
+
+
+
+
+    <!-- MAIN AREA -->
+
+
+    <div class="main-wrapper">
+
+
+      <!-- HEADER GLOBAL -->
+
+
+      <header class="top-header">
+
+
+        <div class="header-left">
+
+
+          <button type="button" class="btn-hamburger" id="btn-sidebar-toggle" title="Toggle Sidebar">
+
+
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+
+
+          </button>
+
+
+          <div class="header-title-box">
+
+
+            <h1 class="header-title">Master Data Linen & Ruangan</h1>
+
+
+            <p class="header-subtitle">Kelola dan kelola seluruh master data linen rumah sakit serta lokasi ruangan</p>
+
+
+          </div>
+
+
+        </div>
+
+
+
+
+
+        <div class="header-right">
+
+
+          <div class="port-reader-box">
+
+
+            <label for="rfid-port-select">Port Reader :</label>
+
+
+            <div class="custom-dropdown port-dropdown" id="dropdown-port" tabindex="0">
+
+
+              <div class="dropdown-selected">COM3</div>
+
+
+              <div class="dropdown-options" id="dropdown-port-options">
+
+
+                <div class="dropdown-option selected" data-value="COM3">COM3</div>
+
+
+              </div>
+
+
+            </div>
+
+
+            <input type="hidden" id="rfid-port-select" value="COM3" />
+
+
+          </div>
+
+
+
+
+
+          <div class="header-status-badge">
+
+
+            <span class="badge-disconnected"><span class="led-dot"></span>DISCONNECTED</span>
+
+
+          </div>
+
+
+
+
+
+          <button type="button" class="header-icon-btn" title="Notifikasi">
+
+
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+
+
+            <span class="notification-dot">3</span>
+
+
+          </button>
+
+
+
+
+
+          <div class="user-avatar" title="Administrator">A</div>
+
+
+        </div>
+
+
+      </header>
+
+
+
+
+
+      <!-- PAGE CONTENT -->
+
+
+      <main class="page-content">
+
+
+        <style>
+
+
+          /* Tab Styles to Match data_linen.html */
+
+
+          .linen-tabs-wrapper {
+
+
+            display: flex;
+
+
+            flex-direction: column;
+
+
+            flex: 1;
+
+
+          }
+
+
+          .tab-nav-container {
+
+
+            display: flex;
+
+
+            gap: 4px;
+
+
+            flex-shrink: 0;
+
+
+            margin-bottom: -1px;
+
+
+            z-index: 2;
+
+
+            position: relative;
+
+
+            padding-left: 0;
+
+
+          }
+
+
+          .master-tab-btn {
+
+
+            height: 48px;
+
+
+            padding: 0 24px;
+
+
+            border-radius: 8px 8px 0 0;
+
+
+            border: 1px solid rgba(0,200,255,0.15);
+
+
+            background: linear-gradient(180deg, #102a4a 0%, #071b33 100%);
+
+
+            color: #8297b0;
+
+
+            font-weight: 600;
+
+
+            font-size: 0.95rem;
+
+
+            cursor: pointer;
+
+
+            transition: all 0.2s ease;
+
+
+            display: flex;
+
+
+            align-items: center;
+
+
+            justify-content: center;
+
+
+            border-bottom: none;
+
+
+            position: relative;
+
+
+          }
+
+
+          .master-tab-btn:not(.active) {
+
+
+            box-shadow: inset 0 -1px 0 rgba(0,200,255,0.15);
+
+
+          }
+
+
+          .master-tab-btn:hover {
+
+
+            background: linear-gradient(180deg, #16365d 0%, #071b33 100%);
+
+
+            color: #fff;
+
+
+          }
+
+
+          .master-tab-btn.active {
+
+
+            background: linear-gradient(180deg, rgba(0, 194, 203, 0.9) 0%, rgba(0, 194, 203, 0.1) 100%);
+
+
+            background-color: #0c2b42;
+
+
+            border-color: rgba(0,200,255,0.4);
+
+
+            color: #fff;
+
+
+            box-shadow: none;
+
+
+          }
+
+
+          .master-tab-content section.table-card {
+
+
+            border-top: 1px solid rgba(0,200,255,0.5);
+
+
+            border-top-left-radius: 0;
+
+
+            z-index: 1;
+
+
+            position: relative;
+
+
+            box-shadow: inset 0 30px 40px -15px rgba(0, 194, 203, 0.25);
+
+
+          }
+
+
+        </style>
+
+
+
+
+
+        <div class="linen-tabs-wrapper">
+
+
+          <!-- Sub-nav Tabs Bar -->
+
+
+          <div class="tab-nav-container">
+
+
+            <button type="button" class="linen-tab master-tab-btn active" data-target="tab-master-all">1. Data Semua Linen</button>
+
+
+            <button type="button" class="linen-tab master-tab-btn" data-target="tab-master-dicuci">2. Linen di Cuci</button>
+
+
+            <button type="button" class="linen-tab master-tab-btn" data-target="tab-master-dipakai">3. Linen di Pakai</button>
+
+
+            <button type="button" class="linen-tab master-tab-btn" data-target="tab-master-ruangan">4. Data Ruangan</button>
+
+
+          </div>
+
+
+
+
+
+          <!-- Tab 1: Data Semua Linen -->
+
+
+          <div class="master-tab-content" id="tab-master-all">
+
+
+            <section class="card table-card">
+
+
+              <div class="table-card-wrap">
+
+
+                <div class="table-wrap">
+
+
+                  <table>
+
+
+                    <thead>
+
+
+                      <tr><th>No</th><th>EPC</th><th>Kategori</th><th>Nama Linen</th><th>Status</th><th>Total Cuci</th></tr>
+
+
+                    </thead>
+
+
+                    <tbody id="linen-all-body">
+
+
+                      <tr><td colspan="6" style="text-align:center; color:var(--text-sub);">Memuat data linen...</td></tr>
+
+
+                    </tbody>
+
+
+                  </table>
+
+
+                </div>
+
+
+              </div>
+
+
+            </section>
+
+
+          </div>
+
+
+
+
+
+        <!-- Tab 2: Linen di Cuci -->
+
+
+        <div class="master-tab-content" id="tab-master-dicuci" style="display:none;">
+
+
+          <section class="card table-card">
+
+
+            <div class="table-card-wrap">
+
+
+              <div class="table-wrap">
+
+
+                <table>
+
+
+                  <thead>
+
+
+                    <tr><th>No</th><th>EPC</th><th>Kategori</th><th>Nama Linen</th><th>Status</th><th>Total Cuci</th></tr>
+
+
+                  </thead>
+
+
+                  <tbody id="linen-dicuci-body">
+
+
+                    <tr><td colspan="6" style="text-align:center; color:var(--text-sub);">Tidak ada linen dicuci.</td></tr>
+
+
+                  </tbody>
+
+
+                </table>
+
+
+              </div>
+
+
+            </div>
+
+
+          </section>
+
+
+        </div>
+
+
+
+
+
+        <!-- Tab 3: Linen di Pakai -->
+
+
+        <div class="master-tab-content" id="tab-master-dipakai" style="display:none;">
+
+
+          <section class="card table-card">
+
+
+            <div class="table-card-wrap">
+
+
+              <div class="table-wrap">
+
+
+                <table>
+
+
+                  <thead>
+
+
+                    <tr><th>No</th><th>EPC</th><th>Kategori</th><th>Nama Linen</th><th>Status</th></tr>
+
+
+                  </thead>
+
+
+                  <tbody id="linen-dipakai-body">
+
+
+                    <tr><td colspan="5" style="text-align:center; color:var(--text-sub);">Tidak ada linen dipakai.</td></tr>
+
+
+                  </tbody>
+
+
+                </table>
+
+
+              </div>
+
+
+            </div>
+
+
+          </section>
+
+
+        </div>
+
+
+
+
+
+        <!-- Tab 4: Data Ruangan -->
+
+
+        <div class="master-tab-content" id="tab-master-ruangan" style="display:none;">
+
+
+          <section class="card table-card" style="width: 100%; max-width: 100%;">
+
+
+            <!-- Header matching the screenshot -->
+
+
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+
+
+              <div style="display: flex; align-items: center; gap: 12px;">
+
+
+                <div style="width: 32px; height: 32px; background: rgba(0, 212, 255, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+
+
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="2">
+
+
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+
+
+                    <line x1="9" y1="3" x2="9" y2="21"></line>
+
+
+                  </svg>
+
+
+                </div>
+
+
+                <h2 style="font-size: 1.15rem; color: #00D4FF; font-weight: 600; margin: 0;">Data Ruangan</h2>
+
+
+              </div>
+
+
+              <div style="display: flex; align-items: center; gap: 12px;">
+
+
+                <div class="card-search-box" style="position:relative; width: 250px;">
+
+
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8297b0" stroke-width="2" style="position:absolute; left:12px; top:50%; transform:translateY(-50%);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+
+
+                  <input id="ruangan-search" placeholder="Cari ruangan..." style="width:100%; background:rgba(255,255,255,0.05); border:1px solid #173554; border-radius:6px; padding:8px 12px 8px 36px; color:#fff; font-size:0.85rem; outline:none;" />
+
+
+                </div>
+
+
+                <button type="button" id="btn-tambah-ruangan" style="background: #00D4FF; color: #000; border: none; border-radius: 6px; padding: 0 16px; height: 34px; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+
+
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+
+
+                  Tambah
+
+
+                </button>
+
+
+              </div>
+
+
+            </div>
+
+
+
+
+
+            <div class="table-card-wrap" style="width: 100%;">
+
+
+              <div class="table-wrap">
+
+
+                <table style="width: 100%;">
+
+
+                  <thead>
+
+
+                    <tr>
+
+
+                      <th style="padding:0 24px;">NO</th>
+
+
+                      <th>KODE RUANGAN</th>
+
+
+                      <th>NAMA RUANGAN</th>
+
+
+                      <th>KETERANGAN</th>
+
+
+                      <th>STATUS</th>
+
+
+                      <th>AKSI</th>
+
+
+                    </tr>
+
+
+                  </thead>
+
+
+                  <tbody id="ruangan-table-body">
+
+
+                    <tr><td colspan="6" style="text-align:center; color:var(--text-sub);">Memuat ruangan...</td></tr>
+
+
+                  </tbody>
+
+
+                </table>
+
+
+              </div>
+
+
+            </div>
+
+
+            
+
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px;">
+
+
+              <div style="color: #8297b0; font-size: 0.85rem;">Menampilkan 1 - 10 dari 10 data</div>
+
+
+              <div style="display: flex; gap: 4px;">
+
+
+                <button style="background: rgba(255,255,255,0.05); border: 1px solid #173554; color: #8297b0; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer;">&lt;</button>
+
+
+                <button style="background: #00D4FF; border: none; color: #fff; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 600; cursor: pointer;">1</button>
+
+
+                <button style="background: rgba(255,255,255,0.05); border: 1px solid #173554; color: #8297b0; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer;">&gt;</button>
+
+
+              </div>
+
+
+            </div>
+
+
+          </section>
+
+
+
+
+
+          <!-- Modal Tambah / Edit Ruangan -->
+
+
+          <div id="ruangan-modal" style="display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); align-items: center; justify-content: center;">
+
+
+            <div style="background: #061426; border: 1px solid #173554; border-radius: 12px; width: 400px; max-width: 90%; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+
+
+              <div style="padding: 16px 24px; border-bottom: 1px solid #173554; display: flex; justify-content: space-between; align-items: center;">
+
+
+                <h3 id="modal-ruangan-title" style="margin: 0; font-size: 1.1rem; color: #fff;">Tambah Ruangan</h3>
+
+
+                <button type="button" id="btn-close-ruangan-modal" style="background: transparent; border: none; color: #8297b0; cursor: pointer; padding: 0;">
+
+
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+
+
+                </button>
+
+
+              </div>
+
+
+              <form id="ruangan-form" style="padding: 24px;">
+
+
+                <input type="hidden" id="ruangan-edit-id" name="id" />
+
+
+                
+
+
+                <div style="margin-bottom: 16px;">
+
+
+                  <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; color: #8297b0;">Kode Ruangan</label>
+
+
+                  <input id="kode_ruangan" name="kode_ruangan" required style="width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.02); border: 1px solid #173554; border-radius: 6px; padding: 10px 12px; color: #fff; font-size: 0.9rem; outline: none;" placeholder="Contoh: R-IGD-01" />
+
+
+                </div>
+
+
+                
+
+
+                <div style="margin-bottom: 16px;">
+
+
+                  <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; color: #8297b0;">Nama Ruangan</label>
+
+
+                  <input id="nama_ruangan" name="nama_ruangan" required style="width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.02); border: 1px solid #173554; border-radius: 6px; padding: 10px 12px; color: #fff; font-size: 0.9rem; outline: none;" placeholder="Contoh: IGD Utama" />
+
+
+                </div>
+
+
+                
+
+
+                <div style="margin-bottom: 24px;">
+
+
+                  <label style="display: block; margin-bottom: 6px; font-size: 0.85rem; color: #8297b0;">Keterangan</label>
+
+
+                  <input id="keterangan" name="keterangan" style="width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.02); border: 1px solid #173554; border-radius: 6px; padding: 10px 12px; color: #fff; font-size: 0.9rem; outline: none;" placeholder="Opsional" />
+
+
+                </div>
+
+
+                
+
+
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+
+
+                  <button type="button" id="cancel-ruangan-edit" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid #173554; border-radius: 6px; padding: 8px 16px; cursor: pointer; font-size: 0.9rem;">Batal</button>
+
+
+                  <button type="submit" id="ruangan-submit-button" style="background: #00D4FF; color: #000; border: none; border-radius: 6px; padding: 8px 16px; font-weight: 600; cursor: pointer; font-size: 0.9rem;">Simpan Ruangan</button>
+
+
+                </div>
+
+
+              </form>
+
+
+            </div>
+
+
+          </div>
+
+
+
+
+
+          <script>
+
+
+            document.addEventListener('DOMContentLoaded', () => {
+
+
+              const modal = document.getElementById('ruangan-modal');
+
+
+              const btnAdd = document.getElementById('btn-tambah-ruangan');
+
+
+              const btnClose = document.getElementById('btn-close-ruangan-modal');
+
+
+              const btnCancel = document.getElementById('cancel-ruangan-edit');
+
+
+              const form = document.getElementById('ruangan-form');
+
+
+              const title = document.getElementById('modal-ruangan-title');
+
+
+              const submitBtn = document.getElementById('ruangan-submit-button');
+
+
+
+
+
+              const openModal = () => {
+
+
+                modal.style.display = 'flex';
+
+
+              };
+
+
+              const closeModal = () => {
+
+
+                modal.style.display = 'none';
+
+
+                form.reset();
+
+
+                document.getElementById('ruangan-edit-id').value = '';
+
+
+                title.textContent = 'Tambah Ruangan';
+
+
+                submitBtn.textContent = 'Simpan Ruangan';
+
+
+              };
+
+
+
+
+
+              if (btnAdd) {
+
+
+                btnAdd.addEventListener('click', () => {
+
+
+                  closeModal(); // Reset form state
+
+
+                  openModal();
+
+
+                });
+
+
+              }
+
+
+
+
+
+              if (btnClose) btnClose.addEventListener('click', closeModal);
+
+
+              if (btnCancel) btnCancel.addEventListener('click', closeModal);
+
+
+
+
+
+              if (modal) {
+
+
+                modal.addEventListener('click', (e) => {
+
+
+                  if (e.target === modal) closeModal();
+
+
+                });
+
+
+              }
+
+
+
+
+
+              document.addEventListener('click', (e) => {
+
+
+                if (e.target.closest('[data-action="edit-ruangan"]')) {
+
+
+                  if(title) title.textContent = 'Edit Ruangan';
+
+
+                  if(submitBtn) submitBtn.textContent = 'Update Ruangan';
+
+
+                  openModal();
+
+
+                }
+
+
+              });
+
+
+              
+
+
+              if (form) {
+
+
+                form.addEventListener('submit', () => {
+
+
+                   setTimeout(closeModal, 150);
+
+
+                });
+
+
+              }
+
+
+            });
+
+
+          </script>
+
+
+        </div>
+
+
+        </div>
+
+
+      </main>
+
+
+    </div>
+
+
+  </div>
+
+
+
+
+
+  <script src="/static/app_core.js?v=72"></script>
+
+
+</body>
+
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

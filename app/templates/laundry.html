@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+
+<html lang="id">
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Laundry - Client Checking & Laundry Linen RS</title>
+
+  <link rel="stylesheet" href="/static/styles.css?v=34" />
+
+</head>
+
+<body>
+
+  <div class="app-layout">
+
+    <!-- SIDEBAR GLOBAL -->
+
+    <aside class="sidebar" id="sidebar">
+
+      <div class="sidebar-brand">
+
+        <div class="brand-icon-box">
+
+          <svg class="brand-cross" viewBox="0 0 24 24" fill="currentColor">
+
+            <path
+
+              d="M19 10.5h-5.5V5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v5.5H5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5h5.5V19c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-5.5H19c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5z" />
+
+          </svg>
+
+        </div>
+
+        <div class="brand-text">
+
+          <strong>Client Checking</strong>
+
+          <small>HOSPITAL LINEN SYSTEM</small>
+
+        </div>
+
+      </div>
+
+      <div class="sidebar-menu-label">MENU</div>
+
+      <nav class="sidebar-nav">
+
+        <a href="/dashboard" class="nav-item">
+
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+            <rect x="3" y="3" width="7" height="7"></rect>
+
+            <rect x="14" y="3" width="7" height="7"></rect>
+
+            <rect x="14" y="14" width="7" height="7"></rect>
+
+            <rect x="3" y="14" width="7" height="7"></rect>
+
+          </svg>
+
+          <span>Dashboard</span>
+
+        </a>
+
+        <div class="nav-group">
+
+          <div class="nav-item">
+
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+
+              <polyline points="14 2 14 8 20 8"></polyline>
+
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+
+            </svg>
+
+            <span>Master Data</span>
+
+            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+              <polyline points="6 9 12 15 18 9"></polyline>
+
+            </svg>
+
+          </div>
+
+          <div class="nav-sub">
+
+            <a href="/master-data/linen" class="sub-item">• Data Linen</a>
+
+            <a href="/master-data/ruangan" class="sub-item">• Data Ruangan</a>
+
+          </div>
+
+        </div>
+
+        <div class="nav-group open">
+
+          <a href="/laundry" class="nav-item active">
+
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+              <path
+
+                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+
+              </path>
+
+            </svg>
+
+            <span>Laundry</span>
+
+            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+              <polyline points="6 9 12 15 18 9"></polyline>
+
+            </svg>
+
+          </a>
+
+          <div class="nav-sub">
+
+            <a href="/laundry?tab=masuk" class="sub-item" id="sub-nav-masuk">• Linen Masuk</a>
+
+            <a href="/laundry?tab=keluar" class="sub-item" id="sub-nav-keluar">• Linen Keluar</a>
+
+            <a href="/laundry?tab=history" class="sub-item" id="sub-nav-history">• History Linen</a>
+
+          </div>
+
+        </div>
+
+        <div class="nav-group">
+
+          <a href="/settings" class="nav-item">
+
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+              <circle cx="12" cy="12" r="3"></circle>
+
+              <path
+
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+
+              </path>
+
+            </svg>
+
+            <span>Settings</span>
+
+            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+              <polyline points="6 9 12 15 18 9"></polyline>
+
+            </svg>
+
+          </a>
+
+          <div class="nav-sub">
+
+            <a href="/settings?tab=sync" class="sub-item" id="sub-nav-sync">• Sync Data</a>
+
+            <a href="/settings?tab=log" class="sub-item" id="sub-nav-log">• Log Penerimaan Linen</a>
+
+          </div>
+
+        </div>
+
+      </nav>
+
+      <!-- SIDEBAR READER WIDGET -->
+
+      <div class="sidebar-reader-box">
+
+        <div class="sidebar-reader-title">Reader Status</div>
+
+        <div class="sidebar-reader-status">
+
+          <span id="rfid-status-badge" class="badge-disconnected">
+
+            <span class="led-dot"></span>DISCONNECTED
+
+          </span>
+
+        </div>
+
+        <div class="sidebar-reader-info">
+
+                    <div class="info-row"><span>Mode</span><strong id="sidebar-mode-name">Single Reader Mode</strong></div>
+                    <div class="info-row"><span>Active Scanner</span><strong id="sidebar-active-scanner" style="color: #00D084;">COM3 - Linen Masuk</strong></div>
+          <div class="info-row"><span>Port</span><strong id="sidebar-port-name">COM3</strong></div>
+
+          <div class="info-row"><span>Last Sync</span><strong id="sidebar-last-sync">01/06/2026 20:38:21</strong></div>
+
+        </div>
+
+        <button type="button" class="btn-test-connection" id="btn-test-connection">
+
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+            <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+
+            <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+
+            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+
+            <line x1="12" y1="20" x2="12.01" y2="20"></line>
+
+          </svg>
+
+          Test Connection
+
+        </button>
+
+      </div>
+
+    </aside>
+
+    <!-- MAIN AREA -->
+
+    <div class="main-wrapper">
+
+      <!-- HEADER GLOBAL -->
+
+      <header class="top-header">
+
+        <div class="header-left">
+
+          <button type="button" class="btn-hamburger" id="btn-sidebar-toggle" title="Toggle Sidebar">
+
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+
+            </svg>
+
+          </button>
+
+          <div class="header-title-box">
+
+            <h1 class="header-title" id="page-header-title">Laundry Linen</h1>
+
+            <p class="header-subtitle" id="page-header-subtitle">Kelola transaksi dan proses laundry linen</p>
+
+          </div>
+
+        </div>
+
+        <div class="header-right">
+
+          <div class="port-reader-box">
+
+            <label for="rfid-port-select">Port Reader :</label>
+
+            <div class="custom-dropdown port-dropdown" id="dropdown-port" tabindex="0">
+
+              <div class="dropdown-selected">COM3</div>
+
+              <div class="dropdown-options" id="dropdown-port-options">
+
+                <div class="dropdown-option selected" data-value="COM3">COM3</div>
+
+              </div>
+
+            </div>
+
+            <input type="hidden" id="rfid-port-select" value="COM3" />
+
+          </div>
+
+          <div class="header-status-badge">
+
+            <span class="badge-disconnected"><span class="led-dot"></span>DISCONNECTED</span>
+
+          </div>
+
+          <button type="button" class="header-icon-btn" title="Notifikasi">
+
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+
+            </svg>
+
+            <span class="notification-dot">3</span>
+
+          </button>
+
+          <div class="user-avatar" title="Administrator">A</div>
+
+        </div>
+
+      </header>
+
+      <!-- PAGE CONTENT -->
+
+      <main class="page-content">
+
+        <!-- Sub-nav Pills / Tabs Bar -->
+
+        <div class="pills-nav-bar" style="display: none !important;">
+
+          <button type="button" class="pill-btn tab-btn active" data-target="tab-masuk">Linen Masuk</button>
+
+          <button type="button" class="pill-btn tab-btn" data-target="tab-keluar">Linen Keluar</button>
+
+          <button type="button" class="pill-btn tab-btn" data-target="tab-history">History Linen</button>
+
+        </div>
+
+        <!-- ================= SECTION A: LINEN MASUK ================= -->
+
+        <div class="tab-content" id="tab-masuk">
+
+          <section class="hero-banner">
+
+            <div class="hero-text-box">
+
+              <div class="hero-eyebrow">LINEN MASUK</div>
+
+              <h1 class="hero-title">Linen <span>Masuk</span></h1>
+
+              <p class="hero-desc">Catat linen masuk dari ruangan untuk dicuci. Pastikan data lengkap sebelum diproses.
+
+              </p>
+
+            </div>
+
+            <div class="hero-img-box"
+
+              style="background-image: url('/static/images/banner_laundry_in.png?v=3'); background-size: 85%;"></div>
+
+          </section>
+
+          <div class="layout-2col">
+
+            <!-- Left Side: Scan & Form -->
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <section class="card">
+
+                <div class="card-header">
+
+                  <h2 class="card-title">Scan Linen</h2>
+
+                </div>
+
+                <div class="btn-group" style="margin-bottom: 16px;">
+
+                  <button type="button" class="btn btn-primary btn-toggle-scan"
+
+                    style="display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 140px; transition: all 0.3s ease;">
+
+                    <svg class="scan-icon-play" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"
+
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
+
+                    </svg>
+
+                    <svg class="scan-icon-stop" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"
+
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+
+                      style="display: none;">
+
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+
+                    </svg>
+
+                    <span class="scan-text">Start Scan</span>
+
+                  </button>
+
+                  <button type="button" class="btn btn-secondary btn-reset-table">Reset Tabel</button>
+
+                </div>
+
+                <div class="form-group">
+
+                  <label>Cek Linen Scanned</label>
+
+                  <div class="table-card-wrap" style="max-height: 180px; overflow-y: auto;">
+
+                    <table id="masuk-cek-table">
+
+                      <thead>
+
+                        <tr>
+
+                          <th>No</th>
+
+                          <th>EPC</th>
+
+                        </tr>
+
+                      </thead>
+
+                      <tbody></tbody>
+
+                    </table>
+
+                  </div>
+
+                </div>
+
+              </section>
+
+              <section class="card">
+
+                <div class="card-header">
+
+                  <h2 class="card-title">Form Pengambilan Linen</h2>
+
+                </div>
+
+                <form id="form-masuk">
+
+                  <div class="form-group">
+
+                    <label>Ruangan</label>
+
+                    <input type="text" name="ruangan" value="R. Laundry" required />
+
+                  </div>
+
+                  <div class="form-group">
+
+                    <label>Petugas</label>
+
+                    <input type="text" name="petugas" placeholder="Nama Petugas" required />
+
+                  </div>
+
+                  <div class="form-group">
+
+                    <label>Timestamp</label>
+
+                    <input type="text" class="current-time-input" readonly />
+
+                  </div>
+
+                  <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Proses</button>
+
+                </form>
+
+              </section>
+
+            </div>
+
+            <!-- Right Side: Main Table -->
+
+            <section class="card">
+
+              <div class="card-header">
+
+                <h2 class="card-title">
+
+                  <svg class="card-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+                    <path
+
+                      d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+
+                    </path>
+
+                  </svg>
+
+                  Daftar Linen Masuk
+
+                </h2>
+
+                <div class="card-search-box">
+
+                  <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+                    <circle cx="11" cy="11" r="8"></circle>
+
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+
+                  </svg>
+
+                  <input type="text" id="search-masuk" placeholder="Cari EPC / Nama Linen / Lokasi..." />
+
+                </div>
+
+              </div>
+
+              <div class="table-card-wrap">
+
+                <div class="table-wrap">
+
+                  <table id="masuk-main-table">
+
+                    <thead>
+
+                      <tr>
+
+                        <th>No</th>
+
+                        <th>ID</th>
+
+                        <th>EPC</th>
+
+                        <th>Kategori</th>
+
+                        <th>Nama Linen</th>
+
+                        <th>Jumlah Cuci</th>
+
+                        <th>Lokasi</th>
+
+                        <th>Status</th>
+
+                        <th>Keterangan</th>
+
+                      </tr>
+
+                    </thead>
+
+                    <tbody></tbody>
+
+                  </table>
+
+                </div>
+
+              </div>
+
+            </section>
+
+          </div>
+
+        </div>
+
+        <!-- ================= SECTION C: LINEN KELUAR ================= -->
+
+        <div class="tab-content" id="tab-keluar" style="display:none;">
+
+          <section class="hero-banner">
+
+            <div class="hero-text-box">
+
+              <div class="hero-eyebrow">LINEN KELUAR</div>
+
+              <h1 class="hero-title">Linen <span>Keluar</span></h1>
+
+              <p class="hero-desc">Catat linen keluar dari ruang laundry dan siap digunakan di ruangan tujuan.</p>
+
+            </div>
+
+            <div class="hero-img-box"
+
+              style="background-image: url('/static/images/banner_laundry_out.png?v=2'); background-size: 85%;"></div>
+
+          </section>
+
+          <div class="layout-2col">
+
+            <!-- Left Side: Scan & Form -->
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <section class="card">
+
+                <div class="card-header">
+
+                  <h2 class="card-title">Scan Linen</h2>
+
+                </div>
+
+                <div class="btn-group" style="margin-bottom: 16px;">
+
+                  <button type="button" class="btn btn-primary btn-toggle-scan"
+
+                    style="display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 140px; transition: all 0.3s ease;">
+
+                    <svg class="scan-icon-play" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"
+
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
+
+                    </svg>
+
+                    <svg class="scan-icon-stop" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"
+
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+
+                      style="display: none;">
+
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+
+                    </svg>
+
+                    <span class="scan-text">Start Scan</span>
+
+                  </button>
+
+                  <button type="button" class="btn btn-secondary btn-reset-table">Reset Tabel</button>
+
+                </div>
+
+                <div class="form-group">
+
+                  <label>Cek Linen Scanned</label>
+
+                  <div class="table-card-wrap" style="max-height: 180px; overflow-y: auto;">
+
+                    <table id="keluar-cek-table">
+
+                      <thead>
+
+                        <tr>
+
+                          <th>No</th>
+
+                          <th>EPC</th>
+
+                        </tr>
+
+                      </thead>
+
+                      <tbody></tbody>
+
+                    </table>
+
+                  </div>
+
+                </div>
+
+              </section>
+
+              <section class="card">
+
+                <div class="card-header">
+
+                  <h2 class="card-title">Form Pengiriman Linen</h2>
+
+                </div>
+
+                <form id="form-keluar">
+
+                  <div class="form-group">
+
+                    <label>Pilih Ruangan</label>
+
+                    <div class="custom-dropdown" id="dropdown-ruangan" tabindex="0">
+
+                      <div class="dropdown-selected">-- Pilih Ruangan --</div>
+
+                      <div class="dropdown-options" id="dropdown-ruangan-options">
+
+                        <div class="dropdown-option selected" data-value="">-- Pilih Ruangan --</div>
+
+                      </div>
+
+                    </div>
+
+                    <input type="hidden" id="select-ruangan-keluar" name="ruangan" required />
+
+                  </div>
+
+                  <div class="form-group">
+
+                    <label>Petugas</label>
+
+                    <input type="text" name="petugas" placeholder="Nama Petugas" required />
+
+                  </div>
+
+                  <div class="form-group">
+
+                    <label>Timestamp</label>
+
+                    <input type="text" class="current-time-input" readonly />
+
+                  </div>
+
+                  <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Proses</button>
+
+                </form>
+
+              </section>
+
+            </div>
+
+            <!-- Right Side: Main Table -->
+
+            <section class="card">
+
+              <div class="card-header">
+
+                <h2 class="card-title">
+
+                  <svg class="card-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+                    <path
+
+                      d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+
+                    </path>
+
+                  </svg>
+
+                  Daftar Linen Keluar
+
+                </h2>
+
+                <div class="card-search-box">
+
+                  <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+                    <circle cx="11" cy="11" r="8"></circle>
+
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+
+                  </svg>
+
+                  <input type="text" id="search-keluar" placeholder="Cari EPC / Nama Linen / Lokasi..." />
+
+                </div>
+
+              </div>
+
+              <div class="table-card-wrap">
+
+                <div class="table-wrap">
+
+                  <table id="keluar-main-table">
+
+                    <thead>
+
+                      <tr>
+
+                        <th>No</th>
+
+                        <th>ID</th>
+
+                        <th>EPC</th>
+
+                        <th>Kategori</th>
+
+                        <th>Nama Linen</th>
+
+                        <th>Jumlah Cuci</th>
+
+                        <th>Lokasi</th>
+
+                        <th>Status</th>
+
+                        <th>Keterangan</th>
+
+                      </tr>
+
+                    </thead>
+
+                    <tbody></tbody>
+
+                  </table>
+
+                </div>
+
+              </div>
+
+            </section>
+
+          </div>
+
+        </div>
+
+        <!-- ================= SECTION D: HISTORY LINEN ================= -->
+
+        <div class="tab-content" id="tab-history" style="display:none;">
+
+          <section class="hero-banner">
+
+            <div class="hero-text-box">
+
+              <div class="hero-eyebrow">HISTORY LINEN</div>
+
+              <h1 class="hero-title">History <span>Linen</span></h1>
+
+              <p class="hero-desc">Lihat riwayat lengkap aktivitas linen masuk, proses cuci, dan linen keluar.</p>
+
+            </div>
+
+            <div class="hero-img-box" style="background-image: url('/static/images/banner_history.png?v=2'); background-size: 85%;"></div>
+
+          </section>
+
+          <!-- Stat Cards Row -->
+
+          <section class="stat-grid">
+
+            <div class="stat-card">
+
+              <div class="stat-icon-circle icon-purple">
+
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+
+                  <polyline points="7 10 12 15 17 10"></polyline>
+
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+
+                </svg>
+
+              </div>
+
+              <div class="stat-info">
+
+                <span class="stat-label">Total Linen Masuk</span>
+
+                <strong class="stat-value" id="history-total-masuk">0</strong>
+
+                <span class="stat-subtext" style="color:var(--text-muted);" id="history-subtext-masuk">Menunggu data...</span>
+
+              </div>
+
+            </div>
+
+            <div class="stat-card">
+
+              <div class="stat-icon-circle icon-orange">
+
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+
+                  <polyline points="17 8 12 3 7 8"></polyline>
+
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+
+                </svg>
+
+              </div>
+
+              <div class="stat-info">
+
+                <span class="stat-label">Total Linen Keluar</span>
+
+                <strong class="stat-value" id="history-total-keluar">0</strong>
+
+                <span class="stat-subtext" style="color:var(--text-muted);" id="history-subtext-keluar">Menunggu data...</span>
+
+              </div>
+
+            </div>
+
+            <div class="stat-card">
+
+              <div class="donut-chart-box">
+
+                <svg class="donut-svg" viewBox="0 0 36 36" style="width: 90px; height: 90px;">
+
+                  <!-- Background track -->
+
+                  <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none"
+
+                    stroke="#1e293b" stroke-width="4.5" />
+
+                  <path id="donut-keluar" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none"
+
+                    stroke="#f59e0b" stroke-width="4.5" stroke-dasharray="0, 100" />
+
+                  <path id="donut-masuk" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none"
+
+                    stroke="#8b5cf6" stroke-width="4.5" stroke-dasharray="0, 100" stroke-dashoffset="0" />
+
+                  <!-- Center Text -->
+
+                  <text id="donut-center-number" x="18" y="16" text-anchor="middle" fill="#ffffff" font-size="8" font-weight="bold">0</text>
+
+                  <text x="18" y="22" text-anchor="middle" fill="#8297b0" font-size="3" font-weight="600">Total Linen</text>
+
+                </svg>
+
+                <div class="donut-legend">
+
+                  <strong style="color:var(--text-white); font-size:0.8rem;">Ringkasan Aktivitas (7 Hari)</strong>
+
+                  <div class="legend-item"><span class="legend-dot" style="background:#8b5cf6;"></span> Linen Masuk:
+
+                    <strong id="legend-masuk">0%</strong></div>
+
+                  <div class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span> Linen Keluar:
+
+                    <strong id="legend-keluar">0%</strong></div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+          <div class="layout-2col">
+
+            <!-- Left Side: Log Tables -->
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+
+              <section class="card">
+
+                <div class="card-header">
+
+                  <h2 class="card-title">Log Linen Masuk</h2>
+
+                </div>
+
+                <div class="table-card-wrap">
+
+                  <div class="table-wrap">
+
+                    <table>
+
+                      <thead>
+
+                        <tr>
+
+                          <th>No</th>
+
+                          <th>Tanggal</th>
+
+                          <th>Petugas</th>
+
+                          <th>Ruangan</th>
+
+                          <th>Total Linen</th>
+
+                          <th>Action</th>
+
+                        </tr>
+
+                      </thead>
+
+                      <tbody id="history-masuk-table"></tbody>
+
+                    </table>
+
+                  </div>
+
+                </div>
+
+              </section>
+
+              <section class="card">
+
+                <div class="card-header">
+
+                  <h2 class="card-title">Log Linen Keluar</h2>
+
+                </div>
+
+                <div class="table-card-wrap">
+
+                  <div class="table-wrap">
+
+                    <table>
+
+                      <thead>
+
+                        <tr>
+
+                          <th>No</th>
+
+                          <th>Tanggal</th>
+
+                          <th>Petugas</th>
+
+                          <th>Ruangan</th>
+
+                          <th>Total Linen</th>
+
+                          <th>Action</th>
+
+                        </tr>
+
+                      </thead>
+
+                      <tbody id="history-keluar-table"></tbody>
+
+                    </table>
+
+                  </div>
+
+                </div>
+
+              </section>
+
+            </div>
+
+            <!-- Right Side: Detail Log Table -->
+
+            <section class="card">
+
+              <div class="card-header">
+
+                <h2 class="card-title">Detail Log</h2>
+
+              </div>
+
+              <div class="table-card-wrap">
+
+                <div class="table-wrap">
+
+                  <table id="history-detail-table">
+
+                    <thead>
+
+                      <tr>
+
+                        <th>No</th>
+
+                        <th>EPC</th>
+
+                        <th>Kategori</th>
+
+                        <th>Nama Linen</th>
+
+                        <th>Total Cuci</th>
+
+                        <th>Keterangan</th>
+
+                      </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                      <tr>
+
+                        <td colspan="6" style="text-align:center; color:var(--text-sub);">Pilih baris transaksi pada
+
+                          tabel log.</td>
+
+                      </tr>
+
+                    </tbody>
+
+                  </table>
+
+                </div>
+
+              </div>
+
+            </section>
+
+          </div>
+
+        </div>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <script src="/static/app_core.js?v=72"></script>
+
+</body>
+
+</html>
+
