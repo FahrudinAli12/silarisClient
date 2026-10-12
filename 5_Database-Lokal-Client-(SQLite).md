@@ -9,6 +9,10 @@ Aplikasi klien menggunakan database lokal berbasis **SQLite** yang disimpan pada
 #### **1. Tabel `linen` (Master Data Linen)**
 Menyimpan identitas unik seluruh lembar linen rumah sakit.
 
+> **Aturan Integritas Data Linen:**
+> * Hanya linen yang telah terverifikasi melalui manifest paket cloud (Settings) atau didaftarkan melalui Master Data yang tersimpan di tabel ini. Tag yang belum terdaftar tidak diizinkan masuk ke database.
+> * Linen baru yang masuk selalu diinisialisasi dengan **lokasi: Storage**, **total_cuci: 0**, dan **status: tersedia**.
+
 | Kolom | Tipe Data | Constraint | Keterangan |
 | :--- | :--- | :--- | :--- |
 | `id` | `INTEGER` | PK, Autoincrement | ID unik internal |
@@ -36,7 +40,7 @@ Menyimpan daftar ruangan atau poliklinik tujuan distribusi linen di rumah sakit.
 ### **5.2 Tabel Transaksional & Audit Trail**
 
 #### **3. Tabel `transaksi_linen` (Header Transaksi)**
-Mencatat setiap sesi transaksi batch atau auto-scan pergerakan linen.
+Mencatat setiap sesi transaksi batch resmi yang disubmit melalui formulir UI oleh operator (misal: `TRX-MASUK-...`, `TRX-KELUAR-...`, `TRX-PENERIMAAN-...`). Transaksi murni merekam submission sah petugas, bebas dari entri scanner prematur.
 
 | Kolom | Tipe Data | Constraint | Keterangan |
 | :--- | :--- | :--- | :--- |

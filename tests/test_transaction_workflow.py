@@ -61,6 +61,17 @@ def test_transaction_flow_updates_linen_status_and_blocks_duplicates():
 def test_batch_transaction_workflow():
     init_db()
 
+    # Pre-register linens
+    for epc in ["EPC-BATCH-001", "EPC-BATCH-002"]:
+        client.post("/api/master/linen", json={
+            "epc": epc,
+            "kategori": "Linen General",
+            "nama_linen": f"Linen {epc}",
+            "lokasi": "Storage",
+            "status": "tersedia",
+            "total_cuci": 0
+        })
+
     payload = {
         "jenis_transaksi": "masuk",
         "kode_transaksi": "TRX-BATCH-001",

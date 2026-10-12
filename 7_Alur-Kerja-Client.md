@@ -59,7 +59,8 @@ Tahap ini dilakukan saat rumah sakit menerima pengiriman paket linen baru dari v
      * Tag yang sesuai masuk ke tabel **Linen Terdaftar**.
      * Tag yang tidak terdaftar di manifest masuk ke tabel **Linen Tidak Terdaftar**.
 5. Operator meninjau hasil pencocokan, lalu mengklik **Simpan Data**:
-   * Seluruh linen baru otomatis tersimpan secara atomik ke tabel lokal `linen` dengan status awal `tersedia` dan lokasi `Storage`.
+   * **Hanya tag yang cocok dengan manifest cloud yang didaftarkan ke SQLite lokal.** Tag yang tidak terdaftar diabaikan dan tidak dimasukkan ke tabel `linen`.
+   * Seluruh linen baru otomatis tersimpan secara atomik ke tabel lokal `linen` dengan **lokasi: Storage**, **status: tersedia**, dan **total_cuci: 0**.
    * Sistem membuat header transaksi di `transaksi_linen` (`jenis_transaksi="penerimaan"`), detail item di `detail_transaksi_linen`, dan audit log di `riwayat_linen`.
    * Sistem secara otomatis mengirimkan patch ke Supabase untuk mengubah status paket pengiriman menjadi `received`.
    * Sistem memvalidasi idempotensi (mencegah kode yang sama diproses berulang).
@@ -74,14 +75,15 @@ Tahap pencatatan linen kotor yang ditarik dari ruangan-ruangan perawatan ke unit
 2. Operator membuka menu **Laundry > Linen Masuk** (`/laundry?tab=masuk`).
 3. Klik tombol **Start Scan**:
    * Sistem mengaktifkan reader `COM3` (*Active Scanner: COM3 - Linen Masuk*) dan menonaktifkan reader `COM4` (standby & buffer UART dibersihkan).
-   * Setiap EPC linen kotor yang terbaca antena muncul seketika di tabel *Cek Linen Scanned*.
+   * Setiap EPC linen kotor yang terbaca antena muncul seketika di tabel sementara *Cek Linen Scanned* dan *Daftar Linen Masuk*.
+   * **Prinsip Aman:** Proses scan di UI murni berfungsi sebagai antrean verifikasi visual (*staging preview*). Scan sensor **tidak menyimpan transaksi ke database** dan **tidak menambah jumlah cuci**.
 4. Pada kartu *Form Pengambilan Linen*, periksa Ruangan (default: `R. Laundry`), masukkan **Nama Petugas**, lalu klik **Proses**:
-   * Transaksi batch diproses (`POST /api/transaksi/batch`).
+   * Transaksi batch resmi diproses (`POST /api/transaksi/batch`).
    * Status linen di master data diubah menjadi `dicuci`.
    * Lokasi fisik linen diubah menjadi `R. Laundry`.
-   * Nilai penghitung **Total Cuci** bertambah (+1) untuk setiap lembar linen.
-   * Transaksi masuk tercatat di `transaksi_linen`, `detail_transaksi_linen`, dan `riwayat_linen`.
-5. *(Opsi Otomatis)*: Jika fasilitas lorong laundry telah dilengkapi gate RFID scanner mandiri, scan fisik langsung diproses secara otomatis per item melalui endpoint `/api/transaksi/auto-scan` dengan proteksi debounce 4 detik.
+   * Nilai penghitung **Total Cuci** bertambah (+1) untuk setiap lembar linen secara sah.
+   * Transaksi masuk tercatat di `transaksi_linen` dengan nama petugas formulir, masuk ke **Log Linen Masuk**, serta terekam di `detail_transaksi_linen` dan `riwayat_linen`.
+5. *(Opsi Mandiri)*: Jika lorong laundry dilengkapi gate RFID scanner mandiri tanpa antarmuka web, transaksi dapat diproses via endpoint `/api/transaksi/auto-scan` yang secara otomatis menolak (HTTP 400) tag yang belum terdaftar di database master.
 
 ---
 
@@ -93,7 +95,8 @@ Tahap pengiriman linen yang telah dicuci, dikeringkan, dan disetrika menuju ruan
 2. Operator membuka menu **Laundry > Linen Keluar** (`/laundry?tab=keluar`).
 3. Klik tombol **Start Scan**:
    * Sistem mengaktifkan reader `COM4` (*Active Scanner: COM4 - Linen Keluar*) dan menonaktifkan reader `COM3`.
-   * Seluruh tag linen bersih yang berada di troli terbaca secara massal.
+   * Seluruh tag linen bersih yang berada di troli terbaca dan tampil pada daftar dengan riwayat pencucian terkini (misal: Jumlah Cuci = 1).
+   * Nilai jumlah cuci tidak berubah saat proses scanning.
 4. Pada *Form Pengiriman Linen*:
    * Pilih **Ruangan Tujuan** melalui komponen *Custom Dropdown* (pilihan diambil langsung dari Master Data Ruangan, contoh: *Ruang Mawar 01*).
    * Masukkan **Nama Petugas** pengirim.
@@ -101,7 +104,7 @@ Tahap pengiriman linen yang telah dicuci, dikeringkan, dan disetrika menuju ruan
 5. Sistem memperbarui database:
    * Status linen diubah menjadi `dipakai`.
    * Lokasi fisik linen diubah menjadi nama ruangan tujuan (misal: *Ruang Mawar 01*).
-   * Transaksi keluar berhasil dibukukan.
+   * Transaksi pengiriman resmi dicatat ke database dan masuk ke Log Linen Keluar.
 
 ---
 

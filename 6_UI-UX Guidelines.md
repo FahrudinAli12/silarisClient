@@ -67,9 +67,11 @@ Aplikasi menggunakan layout *single-page application feel* tanpa scrolling halam
    * Menggantikan tag `<select>` HTML bawaan browser yang kaku dengan elemen DIV bertema dark mode custom.
    * Mendukung penutupan otomatis (*auto-dismiss*) saat pengguna mengklik di luar area dropdown.
 
-2. **Tombol Kontrol Scan Interaktif (*Toggle Scan Button*):**
+2. **Tombol Kontrol Scan Interaktif & Konsep Staging Area:**
+   * **Filosofi Interaksi (Staging Area):** Proses scanning RFID di UI berfungsi murni sebagai penampung sementara (*staging/inspection table*) agar operator dapat menginspeksi tag fisik yang terbaca sebelum melakukan pembukuan resmi.
    * **Kondisi Standby:** Berwarna Cyan `#00D4FF` dengan teks "Start Scan" dan ikon *Play* SVG.
    * **Kondisi Scanning:** Otomatis berubah warna menjadi Merah `#ed5968` dengan teks "Stop Scan", ikon *Stop* kotak, dan animasi getar/kedip lembut (*is-scanning*).
+   * **Single Point of Commit (Tombol "Proses"):** Tombol *Proses* pada formulir adalah satu-satunya aksi yang meng-commit data ke database, memastikan riwayat audit hanya mencatat transaksi resmi yang disahkan petugas.
 
 3. **Status Badge Kategori Linen (*Category Badges*):**
    * Diberi styling kapsul dengan warna semi-transparan yang membedakan tipe barang secara sekilas (misal: badge Sprei warna biru muda, Selimut warna cyan, Sarung Bantal warna ungu, Baju Pasien warna amber).

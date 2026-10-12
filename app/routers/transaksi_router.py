@@ -55,20 +55,24 @@ def create_batch_transaksi(payload: BatchTransaksiCreate, db: Session = Depends(
 
     unique_epcs = list(dict.fromkeys(payload.epc_list))
 
+    valid_items = []
     for epc in unique_epcs:
         linen = db.query(Linen).filter(Linen.epc == epc).first()
         if not linen:
-            linen = Linen(
-                epc=epc,
-                kategori="Linen General",
-                nama_linen=f"Linen {epc[-6:]}",
-                lokasi="Storage",
-                status="tersedia",
-                total_cuci=0,
-            )
-            db.add(linen)
-            db.commit()
-            db.refresh(linen)
+            continue
+        valid_items.append((epc, linen))
+
+    if not valid_items:
+        raise HTTPException(
+            status_code=400,
+            detail="Tidak ada linen terdaftar yang dapat diproses. Pastikan linen telah diverifikasi terlebih dahulu."
+        )
+
+    transaksi.total_linen = len(valid_items)
+    db.add(transaksi)
+    db.commit()
+
+    for epc, linen in valid_items:
 
         status_sebelum = linen.status
         lokasi_sebelum = linen.lokasi
@@ -255,31 +259,21 @@ def auto_scan_transaction(payload: AutoScanRequest, db: Session = Depends(get_db
         status_setelah = "dicuci"
         lokasi_setelah = "R. Laundry"
 
-    # Find or create linen
+    # Verify linen exists in master database
     linen = db.query(Linen).filter(Linen.epc == epc).first()
-    status_sebelum = "baru"
-    lokasi_sebelum = "Storage"
-
     if not linen:
-        linen = Linen(
-            epc=epc,
-            kategori="Linen General",
-            nama_linen=f"Linen {epc[-6:]}",
-            lokasi=lokasi_setelah,
-            status=status_setelah,
-            total_cuci=1 if jenis_transaksi == "masuk" else 0,
+        raise HTTPException(
+            status_code=400,
+            detail=f"EPC {epc} belum terdaftar di sistem. Hanya linen yang sudah terdaftar yang dapat diproses."
         )
-        db.add(linen)
-        db.commit()
-        db.refresh(linen)
-    else:
-        status_sebelum = linen.status
-        lokasi_sebelum = linen.lokasi
-        if jenis_transaksi == "masuk":
-            linen.total_cuci += 1
-        linen.status = status_setelah
-        linen.lokasi = lokasi_setelah
-        db.add(linen)
+
+    status_sebelum = linen.status
+    lokasi_sebelum = linen.lokasi
+    if jenis_transaksi == "masuk":
+        linen.total_cuci += 1
+    linen.status = status_setelah
+    linen.lokasi = lokasi_setelah
+    db.add(linen)
 
     kode_trx = f"AUTO-{jenis_transaksi.upper()}-{int(time.time()*1000)}"
     transaksi = TransaksiLinen(

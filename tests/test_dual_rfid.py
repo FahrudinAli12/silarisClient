@@ -83,6 +83,12 @@ def test_database_migration_columns(setup_test_db):
 def test_auto_scan_masuk_com3(setup_test_db):
     """TEST 1: COM3 Scan (RFID_LINEN_MASUK) menghasilkan transaksi LINEN_MASUK."""
     client = TestClient(app)
+    db = setup_test_db
+
+    # Pre-register linen in master
+    if not db.query(Linen).filter(Linen.epc == "E280TESTMASUK001").first():
+        db.add(Linen(epc="E280TESTMASUK001", kategori="Linen General", nama_linen="Linen Masuk Test", lokasi="Storage", status="tersedia", total_cuci=0))
+        db.commit()
 
     payload = {
         "epc": "E280TESTMASUK001",
@@ -102,7 +108,6 @@ def test_auto_scan_masuk_com3(setup_test_db):
     assert data["port_source"] == "COM3"
 
     # Verifikasi data Linen di DB
-    db = setup_test_db
     linen = db.query(Linen).filter(Linen.epc == "E280TESTMASUK001").first()
     assert linen is not None
     assert linen.status == "dicuci"
@@ -112,6 +117,12 @@ def test_auto_scan_masuk_com3(setup_test_db):
 def test_auto_scan_keluar_com4(setup_test_db):
     """TEST 2: COM4 Scan (RFID_LINEN_KELUAR) menghasilkan transaksi LINEN_KELUAR."""
     client = TestClient(app)
+    db = setup_test_db
+
+    # Pre-register linen in master
+    if not db.query(Linen).filter(Linen.epc == "E280TESTKELUAR001").first():
+        db.add(Linen(epc="E280TESTKELUAR001", kategori="Linen General", nama_linen="Linen Keluar Test", lokasi="Storage", status="tersedia", total_cuci=0))
+        db.commit()
 
     payload = {
         "epc": "E280TESTKELUAR001",
@@ -131,7 +142,6 @@ def test_auto_scan_keluar_com4(setup_test_db):
     assert data["port_source"] == "COM4"
 
     # Verifikasi data Linen di DB
-    db = setup_test_db
     linen = db.query(Linen).filter(Linen.epc == "E280TESTKELUAR001").first()
     assert linen is not None
     assert linen.status == "dipakai"
@@ -165,9 +175,39 @@ def test_transaction_validation_rules(setup_test_db):
     assert "COM4" in res2.json()["detail"]
 
 
-def test_existing_manual_transaction(setup_test_db):
-    """Verifikasi bahwa fitur transaksi manual (UI batch form) tetap 100% berjalan."""
+def test_auto_scan_unregistered_tag_rejected(setup_test_db):
+    """TEST 4: EPC yang belum terdaftar di master database DITOLAK dan TIDAK dibuat di tabel linen."""
     client = TestClient(app)
+    db = setup_test_db
+
+    unreg_epc = "E280UNREGTAG999"
+    payload = {
+        "epc": unreg_epc,
+        "transaction_type": "LINEN_MASUK",
+        "reader_name": "RFID_LINEN_MASUK",
+        "port": "COM3",
+        "ruangan": "R. Laundry",
+    }
+
+    res = client.post("/api/transaksi/auto-scan", json=payload)
+    assert res.status_code == 400
+    assert "belum terdaftar" in res.json()["detail"]
+
+    # Pastikan linen TIDAK dibuat di database
+    linen = db.query(Linen).filter(Linen.epc == unreg_epc).first()
+    assert linen is None
+
+
+def test_existing_manual_transaction(setup_test_db):
+    """Verifikasi bahwa fitur transaksi manual (UI batch form) tetap 100% berjalan untuk linen terdaftar."""
+    client = TestClient(app)
+    db = setup_test_db
+
+    # Pre-register linens
+    for epc in ["E280MANUAL001", "E280MANUAL002"]:
+        if not db.query(Linen).filter(Linen.epc == epc).first():
+            db.add(Linen(epc=epc, kategori="Linen General", nama_linen=f"Linen {epc}", lokasi="Storage", status="tersedia", total_cuci=0))
+    db.commit()
 
     payload = {
         "jenis_transaksi": "masuk",

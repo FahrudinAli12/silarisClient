@@ -149,12 +149,20 @@ def simpan_data(payload: SimpanDataPayload, db: Session = Depends(get_db)) -> di
             if not linen:
                 linen = Linen(
                     epc=epc,
-                    kategori=str(item.get("kategori")),
-                    nama_linen=str(item.get("nama_linen")),
+                    kategori=str(item.get("kategori") or "Linen"),
+                    nama_linen=str(item.get("nama_linen") or f"Linen {epc[-6:]}"),
                     lokasi="Storage",
                     status="tersedia",
                     total_cuci=0,
                 )
+                db.add(linen)
+                db.flush()
+            else:
+                linen.kategori = str(item.get("kategori") or linen.kategori)
+                linen.nama_linen = str(item.get("nama_linen") or linen.nama_linen)
+                linen.lokasi = "Storage"
+                linen.status = "tersedia"
+                linen.total_cuci = 0
                 db.add(linen)
                 db.flush()
 

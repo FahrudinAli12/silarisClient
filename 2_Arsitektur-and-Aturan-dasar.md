@@ -80,9 +80,14 @@
      * Ditolak jika nama ruangan sedang digunakan sebagai lokasi aktif linen manapun.
      * Ditolak jika nama ruangan sudah tercatat dalam riwayat header `transaksi_linen` guna menjaga keutuhan riwayat audit (*audit trail*).
 
-4. **Idempotensi Verifikasi Penerimaan Linen Baru**
-   * Satu kode verifikasi paket cloud hanya boleh diproses satu kali di klien.
-   * Jika kode verifikasi sudah pernah disimpan pada riwayat transaksi lokal (`jenis_transaksi == "penerimaan"`), sistem akan menolak duplikasi dengan status HTTP 409 Conflict.
+4. **Idempotensi & Standar Inisialisasi Linen Baru**
+   * Satu kode verifikasi paket cloud hanya boleh diproses satu kali di klien (`HTTP 409 Conflict` jika kode sudah pernah diproses).
+   * Hanya tag EPC yang cocok dengan manifest paket cloud yang didaftarkan ke tabel `linen`. Tag yang tidak terdaftar tidak akan dimasukkan ke database master.
+   * Seluruh linen baru yang didaftarkan melalui verifikasi penerimaan dijamin memiliki lokasi awal `Storage`, status awal `tersedia`, dan jumlah siklus cuci awal `total_cuci = 0`.
 
-5. **Auto-Scan & Debouncing Protection**
-   * Untuk transaksi live auto-scan individual (`POST /api/transaksi/auto-scan`), frontend menerapkan debounce map minimal 4000 ms per kombinasi jenis transaksi dan EPC agar scan berulang dalam hitungan milidetik tidak menghasilkan multi-transaksi duplikat.
+5. **Pemisahan Scan UI dan Transaksi Resmi (*Form-First Submission Rule*)**
+   * Saat operator melakukan pemindaian tag pada antarmuka web (Linen Masuk maupun Linen Keluar), data scan hanya ditampung pada antrean tabel sementara (*temporary UI table*) untuk verifikasi visual operator.
+   * **Pemindaian RFID di UI TIDAK membuat transaksi database dan TIDAK menambah nilai `total_cuci`.**
+   * Transaksi resmi ke database dan penambahan nilai `total_cuci` (+1 pada Linen Masuk) **HANYA dieksekusi ketika operator mengisi formulir (nama petugas, ruangan) dan menekan tombol "Proses"** (`POST /api/transaksi/batch`).
+   * Riwayat transaksi pada menu History Linen murni mencatat transaksi sah hasil pengisian formulir oleh petugas.
+   * Endpoint mandiri `POST /api/transaksi/auto-scan` memvalidasi keberadaan tag di master data dan secara tegas **menolak (HTTP 400 Bad Request)** tag yang belum terdaftar di sistem.

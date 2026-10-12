@@ -141,8 +141,15 @@ Klien frontend terhubung secara real-time ke endpoint ini untuk menerima update 
   }
   ```
 
-#### **2. REST API Hardware Control**
+* **Mekanisme Konsumsi Event EPC di Frontend:**
+  * Saat event `type: "epc"` diterima browser, payload diteruskan ke fungsi `processScannedEpc(payload.epc)` untuk dimasukkan ke dalam Set deduplikasi `scannedEpcs` dan dirender pada tabel UI (*Cek Linen Scanned* dan *Daftar Linen*).
+  * **Frontend TIDAK memanggil endpoint transaksi auto-scan di background.** Pemindaian tag berfungsi murni sebagai penampung preview di antarmuka web.
+  * Transaksi resmi ke database dan penambahan hitungan cuci (+1) hanya dikirimkan ketika operator menekan tombol **Proses** melalui form submission REST API (`POST /api/transaksi/batch`).
+
+#### **2. REST API Hardware Control & Transaksi**
 * `GET /api/rfid/status`: Mengambil status konektivitas reader, mode reader (Single/Dual), daftar port yang tersedia, dan reader aktif.
 * `POST /api/rfid/port`: Mengubah port serial secara dinamis melalui parameter JSON `{"port": "COM3"}`.
 * `POST /api/rfid/scan/start`: Mengaktifkan scanning reader berdasarkan mode transaksi (`{"mode": "LINEN_MASUK"}` atau `{"mode": "LINEN_KELUAR"}`).
 * `POST /api/rfid/scan/stop`: Menghentikan seluruh proses scanning reader.
+* `POST /api/transaksi/batch`: Menyimpan transaksi batch resmi yang disubmit melalui formulir UI (memperbarui status, lokasi, dan menambah `total_cuci` untuk Linen Masuk).
+* `POST /api/transaksi/auto-scan`: Endpoint mandiri untuk integrasi gate RFID hardware (menolak tag yang belum terdaftar di sistem dengan HTTP 400).

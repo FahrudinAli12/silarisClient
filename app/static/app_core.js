@@ -844,7 +844,8 @@ function initWebSocket() {
 const scanDebounceMap = new Map();
 
 async function handleAutoScanTrigger(payload) {
-  if (settingScanActive) return;
+  const path = window.location.pathname;
+  if (settingScanActive || path.includes('/settings') || path.includes('/master-data')) return;
   const epc = payload.epc;
   if (!epc) return;
   const isKeluar = payload.transaction_type === 'LINEN_KELUAR' || payload.port === 'COM4' || payload.reader_name === 'RFID_LINEN_KELUAR';
@@ -941,7 +942,7 @@ async function handleAutoScanTrigger(payload) {
             }
           }
 
-          handleAutoScanTrigger(payload);
+          // Scan RFID hanya mendata tag ke tabel UI sementara. Transaksi hanya dicatat saat form disubmit.
           processScannedEpc(payload.epc);
         }
       } catch (error) {

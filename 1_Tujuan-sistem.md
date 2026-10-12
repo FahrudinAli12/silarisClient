@@ -11,10 +11,11 @@ Sistem Informasi Client Rumah Sakit (*Client Checking & Laundry Linen RS*) diran
    * Menghilangkan proses pencatatan manual linen kotor dan linen bersih yang memakan waktu dan rawan selisih hitung (*human error*).
 
 2. **Manajemen Siklus Operasional Laundry & Distribusi**  
-   * **Penerimaan & Verifikasi Baru:** Memvalidasi linen baru dari supplier/pusat logistik melalui integrasi kode verifikasi cloud sebelum didaftarkan ke inventaris lokal.
+   * **Penerimaan & Verifikasi Baru:** Memvalidasi linen baru dari supplier/pusat logistik melalui integrasi kode verifikasi cloud sebelum didaftarkan ke inventaris lokal. Linen baru dijamin terdaftar dengan status awal *tersedia*, lokasi awal *Storage*, dan akumulasi siklus cuci awal bernilai *0*. Hanya tag yang terverifikasi pada manifest cloud yang didaftarkan ke sistem.
    * **Linen Masuk (Kotor):** Mencatat penerimaan linen kotor ke unit laundry untuk proses pencucian.
-   * **Linen Keluar (Bersih):** Mencatat distribusi linen bersih dari unit laundry ke ruangan perawatan/poliklinik tujuan.
-   * **Perhitungan Siklus Cuci (*Life Cycle Tracking*):** Menghitung akumulasi jumlah cuci (*total_cuci*) setiap lembar linen secara otomatis untuk evaluasi masa pakai kelayakan bahan linen rumah sakit.
+   * **Linen Keluar (Bersih):** Mencatat distribusi linen bersih dari unit laundry ke ruangan perawatan/poliklinik tujuan dengan riwayat jumlah pencucian yang akurat.
+   * **Perhitungan Siklus Cuci (*Life Cycle Tracking*):** Menghitung akumulasi jumlah cuci (*total_cuci*) setiap lembar linen secara presisi (+1) yang bertambah **hanya saat transaksi Linen Masuk resmi disubmit melalui formulir oleh petugas**, mencegah penambahan ganda saat proses scanning sensor.
+   * **Proteksi Validasi Tag:** Memastikan transaksi operasional hanya memproses tag RFID yang sah dan telah terdaftar di database master rumah sakit.
 
 3. **Operasional *Offline-First* dengan Sinkronisasi Cloud**  
    * Memastikan seluruh kegiatan scanning dan transaksi tetap berjalan normal 100% tanpa hambatan meskipun koneksi internet terputus, menggunakan database lokal SQLite (`Client_RumahSakit_Template.db`).

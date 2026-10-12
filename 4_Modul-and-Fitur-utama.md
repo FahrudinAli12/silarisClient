@@ -58,24 +58,25 @@ Pusat kendali proses pencucian, distribusi, dan riwayat transaksi linen harian.
   * Tombol dinamis **Start Scan / Stop Scan** dengan animasi ikon *play/stop*.
   * Tombol **Reset Tabel** untuk mengosongkan antrean scan sementara.
   * Tabel ringkas **Cek Linen Scanned** (*No*, *EPC*) yang otomatis bertambah saat reader mendeteksi tag.
+  * **Aturan Scan:** Pemindaian hanya menampung tag ke dalam tabel antrean sementara di UI untuk verifikasi visual operator. Scan RFID **tidak membuat transaksi prematur** dan **tidak menambah jumlah cuci**.
 * **Form Pengambilan Linen:**
   * Input Ruangan (default: `R. Laundry`), Nama Petugas, dan Timestamp real-time.
-  * Tombol **Proses**: Memproses transaksi batch (`POST /api/transaksi/batch`), mengubah status linen menjadi `dicuci`, memperbarui lokasi ke `R. Laundry`, dan menambah nilai `total_cuci` (+1).
+  * Tombol **Proses**: Memproses transaksi batch resmi (`POST /api/transaksi/batch`), mengubah status linen menjadi `dicuci`, memperbarui lokasi ke `R. Laundry`, mencatat transaksi resmi dengan nama petugas form, dan menambah nilai `total_cuci` (+1).
 * **Daftar Linen Masuk:** Tabel utama dengan kolom lengkap (*No, ID, EPC, Kategori, Nama Linen, Jumlah Cuci, Lokasi, Status, Keterangan*) serta search box filter.
 
 #### **B. Linen Keluar (`/laundry?tab=keluar`)**
-* **Area Scan Linen:** Fitur scanning linen bersih yang siap didistribusikan.
+* **Area Scan Linen:** Fitur scanning linen bersih yang siap didistribusikan ke ruangan perawatan.
 * **Form Pengiriman Linen:**
   * Komponen **Custom Dropdown** untuk memilih ruangan tujuan yang terdaftar pada Master Ruangan.
   * Input Nama Petugas dan Timestamp.
-  * Tombol **Proses**: Mengubah status linen menjadi `dipakai` dan memperbarui lokasi fisik linen ke ruangan tujuan.
+  * Tombol **Proses**: Mengubah status linen menjadi `dipakai`, memperbarui lokasi fisik linen ke ruangan tujuan, dan membukukan transaksi pengiriman resmi (tanpa menambah `total_cuci`).
 * **Daftar Linen Keluar:** Tabel utama yang menampilkan daftar linen keluar yang berhasil didistribusikan.
 
 #### **C. History Linen (`/laundry?tab=history`)**
 * **Ringkasan Metrik:** Counter *Total Linen Masuk*, *Total Linen Keluar*, dan grafik donat ringkasan aktivitas 7 hari terakhir.
 * **Dual Log Table:**
-  * **Log Linen Masuk:** Daftar transaksi masuk (*No, Tanggal, Petugas, Ruangan, Total Linen, Action Arrow*).
-  * **Log Linen Keluar:** Daftar transaksi keluar ke ruangan.
+  * **Log Linen Masuk:** Menampilkan seluruh transaksi masuk yang sah dari pengisian formulir oleh petugas (*No, Tanggal, Petugas, Ruangan, Total Linen, Action Arrow*). Log bersih dari entri dummy/prematur scanner.
+  * **Log Linen Keluar:** Daftar transaksi keluar ke ruangan pasien dari formulir distribusi.
 * **Detail Log Interaktif (Panel Kanan):**
   * Saat salah satu baris transaksi diklik, tabel **Detail Log** di sebelah kanan otomatis menampilkan seluruh item EPC yang terlibat beserta kategori, nama linen, riwayat cuci, dan catatan transaksi.
 
@@ -96,7 +97,8 @@ Modul integrasi eksternal untuk verifikasi pengiriman linen baru dan audit sinkr
      * **Tabel Linen Terdaftar:** Item yang cocok dengan manifest cloud supplier.
      * **Tabel Linen Tidak Terdaftar:** Item yang terbaca namun tidak ada pada manifest pengiriman.
 4. **Simpan Data Atomik (`POST /api/setting/simpan-data`):**
-   * Mendaftarkan seluruh linen valid ke master database SQLite lokal.
+   * **Hanya tag yang cocok dengan manifest cloud yang didaftarkan ke master database.** Tag tidak terdaftar diabaikan dan tidak dimasukkan ke tabel `linen`.
+   * Seluruh linen baru yang disimpan otomatis diinisialisasi dengan **lokasi: Storage**, **status: tersedia**, dan **total_cuci: 0**.
    * Membuat header transaksi penerimaan dan riwayat pergerakan item.
    * Menandai status paket di Supabase sebagai `received` secara otomatis.
    * Mencegah duplikasi data melalui proteksi idempotensi (HTTP 409 jika kode sudah pernah diproses).
@@ -112,10 +114,12 @@ Modul integrasi eksternal untuk verifikasi pengiriman linen baru dan audit sinkr
 
 ### **4.5 Auto-Scan Individual Transaction (`/api/transaksi/auto-scan`)**
 
-Selain pemrosesan form batch, sistem dilengkapi endpoint auto-scan pintar untuk otomasi lorong/gate scanner:
-* Tag terbaca pada reader **COM3** otomatis dicatat sebagai transaksi Linen Masuk (`status=dicuci`, `lokasi=R. Laundry`, `total_cuci + 1`).
-* Tag terbaca pada reader **COM4** otomatis dicatat sebagai transaksi Linen Keluar (`status=dipakai`, `lokasi=Ruangan Pasien`).
-* Dilengkapi *frontend debouncing cache* 4 detik per tag agar tidak terjadi spam multi-transaksi.
+Selain pemrosesan form batch, sistem menyediakan endpoint auto-scan untuk integrasi gate/lorong RFID mandiri tanpa UI:
+* **Validasi Pendaftaran Tag:** Endpoint secara ketat menolak (HTTP 400 Bad Request) tag yang belum terdaftar di database master rumah sakit. Tag baru wajib diverifikasi terlebih dahulu melalui modul Settings.
+* Jika tag sah dan terdaftar:
+  * Tag terbaca pada reader **COM3** diproses sebagai transaksi Linen Masuk (`status=dicuci`, `lokasi=R. Laundry`, `total_cuci + 1`).
+  * Tag terbaca pada reader **COM4** diproses sebagai transaksi Linen Keluar (`status=dipakai`, `lokasi=Ruangan Pasien`).
+* Antarmuka web klien **TIDAK memanggil endpoint ini secara otomatis** saat proses scan interaktif di halaman Laundry/Settings, sehingga alur UI tetap terkontrol melalui pengisian form.
 
 ---
 
