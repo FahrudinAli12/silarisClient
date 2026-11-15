@@ -748,8 +748,8 @@ async def test_scen18_com_port_change_invalidates_active_session(isolated_coordi
     env = isolated_coordinator_env
     rfid_mgr: RFIDServiceManager = env["rfid_manager"]
 
-    scan_session_masuk = RFIDScanSession(operation_id="op-port-chg", paket_id=218, reader_name="RFID_LINEN_MASUK", port="COM3")
-    scan_session_keluar = RFIDScanSession(operation_id="op-unrelated", paket_id=218, reader_name="RFID_LINEN_KELUAR", port="COM4")
+    scan_session_masuk = RFIDScanSession(operation_id="op-port-chg", paket_id=218, reader_name="RFID_LINEN_MASUK", port=rfid_mgr.incoming_reader.port)
+    scan_session_keluar = RFIDScanSession(operation_id="op-unrelated", paket_id=218, reader_name="RFID_LINEN_KELUAR", port=rfid_mgr.outgoing_reader.port)
 
     rfid_mgr.register_scan_session(scan_session_masuk)
     rfid_mgr.register_scan_session(scan_session_keluar)
