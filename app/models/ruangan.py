@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import DateTime, Integer, String
+from sqlalchemy import Boolean, DateTime, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -17,4 +17,5 @@ class Ruangan(Base):
     kode_ruangan: Mapped[str] = mapped_column(String(20), unique=True, nullable=False, index=True)
     nama_ruangan: Mapped[str] = mapped_column(String(100), nullable=False)
     keterangan: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default="1", nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

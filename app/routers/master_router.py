@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -10,8 +11,14 @@ from app.models.reader_device import ReaderDevice
 from app.models.transaksi_linen import TransaksiLinen
 from app.schemas.linen_schema import LinenCreate, LinenUpdate, LinenResponse
 from app.schemas.ruangan_schema import RuanganCreate, RuanganUpdate, RuanganResponse
+from app.services.auth_dependencies import require_active_session, require_master_data_editor
+from app.services.session_store import SessionData
 
-router = APIRouter(prefix="/master", tags=["master"])
+router = APIRouter(
+    prefix="/master",
+    tags=["master"],
+    dependencies=[Depends(require_active_session)],
+)
 
 
 @router.get("/linen", response_model=list[LinenResponse])
@@ -80,9 +87,24 @@ def delete_linen(linen_id: int, db: Session = Depends(get_db)) -> dict[str, str]
 
 
 @router.get("/ruangan", response_model=list[RuanganResponse])
-def list_ruangan(q: str | None = None, db: Session = Depends(get_db)) -> list[Ruangan]:
-    """Daftar master ruangan dengan pencarian sederhana."""
+def list_ruangan(
+    q: str | None = None,
+    is_active: bool | None = None,
+    session: SessionData = Depends(require_active_session),
+    db: Session = Depends(get_db),
+) -> list[Ruangan]:
+    """Daftar master ruangan dengan pencarian sederhana dan filter status aktif.
+
+    Akses:
+    - Seluruh pengguna terautentikasi (Admin, Supervisor, Operator) dapat membaca.
+    - Parameter is_active:
+      - None: Kembalikan semua ruangan (aktif & nonaktif) untuk kebutuhan manajemen.
+      - True: Hanya kembalikan ruangan aktif (untuk dropdown transaksi).
+      - False: Hanya kembalikan ruangan nonaktif.
+    """
     query = db.query(Ruangan)
+    if is_active is not None:
+        query = query.filter(Ruangan.is_active == is_active)
     if q:
         search = f"%{q.lower()}%"
         query = query.filter(
@@ -94,8 +116,12 @@ def list_ruangan(q: str | None = None, db: Session = Depends(get_db)) -> list[Ru
 
 
 @router.post("/ruangan", response_model=RuanganResponse, status_code=status.HTTP_201_CREATED)
-def create_ruangan(payload: RuanganCreate, db: Session = Depends(get_db)) -> Ruangan:
-    """Buat data ruangan baru."""
+def create_ruangan(
+    payload: RuanganCreate,
+    session: SessionData = Depends(require_master_data_editor),
+    db: Session = Depends(get_db),
+) -> Ruangan:
+    """Buat data ruangan baru. Wajib role Admin atau Supervisor."""
     existing = db.query(Ruangan).filter(Ruangan.kode_ruangan == payload.kode_ruangan).first()
     if existing:
         raise HTTPException(status_code=400, detail="Kode ruangan sudah ada")
@@ -107,38 +133,74 @@ def create_ruangan(payload: RuanganCreate, db: Session = Depends(get_db)) -> Rua
 
 
 @router.put("/ruangan/{ruangan_id}", response_model=RuanganResponse)
-def update_ruangan(ruangan_id: int, payload: RuanganUpdate, db: Session = Depends(get_db)) -> Ruangan:
+def update_ruangan(
+    ruangan_id: int,
+    payload: RuanganUpdate,
+    session: SessionData = Depends(require_master_data_editor),
+    db: Session = Depends(get_db),
+) -> Ruangan:
+    """Perbarui data ruangan (kode, nama, keterangan, is_active). Wajib role Admin atau Supervisor."""
     ruangan = db.query(Ruangan).filter(Ruangan.id == ruangan_id).first()
     if ruangan is None:
         raise HTTPException(status_code=404, detail="Ruangan tidak ditemukan")
-    for key, value in payload.model_dump(exclude_unset=True).items():
-        if key == "keterangan":
-            setattr(ruangan, key, value)
-        elif value is not None and value != "":
-            setattr(ruangan, key, value)
+
+    update_dict = payload.model_dump(exclude_unset=True)
+
+    if "kode_ruangan" in update_dict and update_dict["kode_ruangan"]:
+        new_kode = update_dict["kode_ruangan"].strip()
+        if new_kode != ruangan.kode_ruangan:
+            existing = db.query(Ruangan).filter(
+                Ruangan.kode_ruangan == new_kode,
+                Ruangan.id != ruangan_id,
+            ).first()
+            if existing:
+                raise HTTPException(status_code=400, detail="Kode ruangan sudah digunakan oleh ruangan lain")
+            ruangan.kode_ruangan = new_kode
+
+    if "nama_ruangan" in update_dict and update_dict["nama_ruangan"]:
+        ruangan.nama_ruangan = update_dict["nama_ruangan"].strip()
+
+    if "keterangan" in update_dict:
+        ruangan.keterangan = update_dict["keterangan"]
+
+    if "is_active" in update_dict and update_dict["is_active"] is not None:
+        ruangan.is_active = bool(update_dict["is_active"])
+
     db.commit()
     db.refresh(ruangan)
     return ruangan
 
 
-@router.delete("/ruangan/{ruangan_id}", response_model=dict[str, str])
-def delete_ruangan(ruangan_id: int, db: Session = Depends(get_db)) -> dict[str, str]:
+@router.delete("/ruangan/{ruangan_id}", response_model=dict[str, Any])
+def delete_ruangan(
+    ruangan_id: int,
+    session: SessionData = Depends(require_master_data_editor),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Penonaktifan ruangan (Soft-Delete Enforcement). Wajib role Admin atau Supervisor.
+
+    Kebijakan Integritas:
+    - Tidak melakukan SQL DELETE fisik pada tabel ruangan dalam kondisi apapun.
+    - Mengubah kolom is_active menjadi False.
+    - Record master ruangan tetap abadi di SQLite demi menjaga integritas data riwayat
+      TransaksiLinen dan Linen.lokasi seumur hidup sistem (bahkan jika ruangan pernah di-rename).
+    - Mencegah orphaning jejak audit historis.
+    """
     ruangan = db.query(Ruangan).filter(Ruangan.id == ruangan_id).first()
     if ruangan is None:
         raise HTTPException(status_code=404, detail="Ruangan tidak ditemukan")
-        
-    # Validasi integritas referensial
-    linen_terkait = db.query(Linen).filter(Linen.lokasi == ruangan.nama_ruangan).first()
-    if linen_terkait:
-        raise HTTPException(status_code=400, detail=f"Ruangan ini sedang dipakai sebagai lokasi linen ({linen_terkait.epc}). Hapus atau pindahkan linen tersebut terlebih dahulu.")
-        
-    transaksi_terkait = db.query(TransaksiLinen).filter(TransaksiLinen.ruangan == ruangan.nama_ruangan).first()
-    if transaksi_terkait:
-        raise HTTPException(status_code=400, detail=f"Ruangan ini terdapat pada riwayat transaksi ({transaksi_terkait.kode_transaksi}). Penghapusan ditolak untuk menjaga integritas history.")
 
-    db.delete(ruangan)
+    # Soft-delete enforcement: ubah is_active menjadi False tanpa SQL DELETE fisik
+    ruangan.is_active = False
     db.commit()
-    return {"status": "deleted"}
+    db.refresh(ruangan)
+    return {
+        "status": "deleted",
+        "action": "deactivated",
+        "message": f"Ruangan '{ruangan.nama_ruangan}' berhasil dinonaktifkan (soft-delete). Record master tetap tersimpan untuk integritas riwayat transaksi.",
+        "id": ruangan.id,
+        "is_active": ruangan.is_active,
+    }
 
 
 @router.get("/reader", response_model=list[dict])

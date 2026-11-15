@@ -10,9 +10,14 @@ from app.models.transaksi_linen import TransaksiLinen
 from app.schemas.detail_transaksi_schema import DetailTransaksiCreate, DetailTransaksiResponse
 from app.schemas.riwayat_schema import RiwayatCreate, RiwayatResponse
 from app.schemas.transaksi_schema import BatchTransaksiCreate, TransaksiCreate, TransaksiResponse
+from app.services.auth_dependencies import require_active_session
 from app.services.sync_service import SyncService
 
-router = APIRouter(prefix="/transaksi", tags=["transaksi"])
+router = APIRouter(
+    prefix="/transaksi",
+    tags=["transaksi"],
+    dependencies=[Depends(require_active_session)],
+)
 
 
 @router.get("", response_model=list[TransaksiResponse])

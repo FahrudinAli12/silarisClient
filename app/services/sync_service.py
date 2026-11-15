@@ -41,23 +41,21 @@ class SyncService:
             time.sleep(5)
 
     def _drain_pending(self) -> None:
+        """Pemeriksaan antrean lokal di latar belakang.
+
+        PERHATIAN KEAMANAN TAHAP 3B:
+        Pengiriman cloud otomatis dari worker lama dinonaktifkan pada tahap ini sampai mekanisme
+        otorisasi worker berbasis cloud yang jelas tersedia. Antrean lokal tetap dipertahankan aman di database
+        tanpa memilih akun pengguna atau sesi secara sembarang.
+        """
         db: Session = SessionLocal()
         try:
-            rows = db.query(PengirimanTemp).filter(PengirimanTemp.status == "pending").all()
-            for row in rows:
-                payload = json.loads(row.payload)
-                logger.info("Sinkronisasi payload %s", payload)
-                try:
-                    service = SupabaseService()
-                    if service.is_configured():
-                        service.push_record("sync_events", payload)
-                        row.status = "sent"
-                    else:
-                        row.status = "pending"
-                except (httpx.HTTPError, RuntimeError, ValueError) as exc:
-                    logger.warning("Sinkronisasi gagal: %s", exc)
-                    row.status = "pending"
-            db.commit()
+            pending_count = db.query(PengirimanTemp).filter(PengirimanTemp.status == "pending").count()
+            if pending_count > 0:
+                logger.debug(
+                    "Worker sync: %d antrean lokal tersimpan. Pengiriman otomatis ke cloud ditangguhkan.",
+                    pending_count,
+                )
         finally:
             db.close()
 
@@ -73,14 +71,11 @@ class SyncService:
         logger.info("Payload masuk buffer offline: %s", payload)
 
     def sync_now(self) -> dict[str, Any]:
-        """Proses sinkronisasi manual."""
+        """Proses sinkronisasi manual ke antrean lokal."""
         payload = {"event": "manual_sync", "timestamp": time.time()}
         self.enqueue_for_sync(payload)
-        try:
-            service = SupabaseService()
-            if service.is_configured():
-                service.push_record("sync_events", payload)
-                return {"status": "sent", "message": "Sinkronisasi berhasil ke Supabase"}
-        except (httpx.HTTPError, RuntimeError, ValueError) as exc:
-            logger.warning("Sinkronisasi manual gagal: %s", exc)
-        return {"status": "queued", "message": "Sinkronisasi diminta, akan diproses via buffer lokal"}
+        return {
+            "status": "queued",
+            "message": "Sinkronisasi diminta. Data tersimpan aman di antrean buffer lokal.",
+        }
+

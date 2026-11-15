@@ -1,32 +1,44 @@
 from __future__ import annotations
 
-import os
 import logging
+import os
 from typing import Any
 
 import httpx
 
+import re
+
 logger = logging.getLogger(__name__)
+
+_EPC_HEX_24_RE = re.compile(r"^[0-9A-F]{24}$")
 
 
 def clean_epc(epc_str: str) -> str:
     clean = str(epc_str).strip().upper()
     if len(clean) == 28 and clean.startswith("3000"):
-        return clean[4:]
+        clean = clean[4:]
+    if not _EPC_HEX_24_RE.match(clean):
+        raise ValueError(f"INVALID_EPC_FORMAT: Tag EPC '{epc_str}' tidak valid (wajib 24 karakter hex).")
     return clean
 
 
 class CloudSyncService:
-    """Service untuk mengambil data paket linen dari Supabase berdasarkan kode verifikasi."""
+    """Service legacy untuk mengambil data paket linen dari Supabase berdasarkan kode verifikasi."""
 
-    def __init__(self) -> None:
-        self.url = os.getenv("SUPABASE_URL", "https://suhdejzcneeaozlmtguf.supabase.co").strip().rstrip("/")
-        self.key = os.getenv("SUPABASE_ANON_KEY", "sb_publishable_HB4P4zn44hazfOnEF_2imQ_iFsdWfrf").strip()
+    def __init__(self, url: str | None = None, key: str | None = None) -> None:
+        # Menghapus fallback URL dan key yang tertanam di source code (F8 Fix)
+        self.url = (url or os.getenv("SUPABASE_URL", "")).strip().rstrip("/")
+        self.key = (key or os.getenv("SUPABASE_ANON_KEY") or os.getenv("SUPABASE_PUBLISHABLE_KEY", "")).strip()
 
     def is_configured(self) -> bool:
         return bool(self.url and self.key)
 
     def _headers(self) -> dict[str, str]:
+        if not self.is_configured():
+            raise RuntimeError(
+                "Koneksi cloud (Supabase) belum dikonfigurasi. "
+                "Harap isi SUPABASE_URL dan SUPABASE_ANON_KEY pada konfigurasi environment."
+            )
         return {
             "apikey": self.key,
             "Authorization": f"Bearer {self.key}",
@@ -66,7 +78,7 @@ class CloudSyncService:
 
         paket = rows[0]
 
-        if paket.get("status") == "received":
+        if paket.get("status") in ("received", "confirmed"):
             raise ValueError(
                 f"Kode verifikasi '{verification_code}' sudah pernah diterima dan diproses. "
                 "Gunakan kode yang belum digunakan."
@@ -106,18 +118,15 @@ class CloudSyncService:
         return {"paket": paket, "linen_items": normalized_items}
 
     def mark_paket_received(self, paket_id: str | int) -> None:
-        """Tandai paket sebagai sudah diterima di Supabase."""
-        if not self.is_configured():
-            return  # Silently skip if not configured — local save still succeeds
-
-        url = f"{self.url}/rest/v1/pengiriman_linen?id=eq.{paket_id}"
-        try:
-            resp = httpx.patch(
-                url,
-                headers=self._headers(),
-                json={"status": "received"},
-                timeout=10.0,
-            )
-            resp.raise_for_status()
-        except httpx.HTTPError as exc:
-            logger.warning("Gagal menandai paket %s sebagai received: %s", paket_id, exc)
+        """
+        Tandai paket sebagai sudah diterima di Supabase.
+        
+        CATATAN INTEGRITAS R2.9 (F8):
+        Jalur HTTP PATCH langsung ke tabel pengiriman_linen telah DINONAKTIFKAN secara permanen.
+        Seluruh konfirmasi penerimaan paket wajib melalui Confirm RPC resmi
+        (PackageReceivingService.confirm_package).
+        """
+        raise RuntimeError(
+            "DIRECT_PATCH_PROHIBITED: Pembaruan status paket via HTTP PATCH langsung dilarang demi integritas multi-tenant "
+            "dan state machine immutability. Seluruh konfirmasi penerimaan paket wajib menggunakan Confirm RPC resmi."
+        )

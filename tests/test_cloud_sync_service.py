@@ -1,6 +1,7 @@
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
 import httpx
+import pytest
 
 from app.main import app
 from app.services.cloud_sync_service import CloudSyncService
@@ -8,45 +9,32 @@ from app.services.cloud_sync_service import CloudSyncService
 client = TestClient(app)
 
 
-def test_cloud_sync_service_default_configuration():
-    service = CloudSyncService()
-    assert service.is_configured() is True
-    assert service.url == "https://suhdejzcneeaozlmtguf.supabase.co"
-    assert service.key == "sb_publishable_HB4P4zn44hazfOnEF_2imQ_iFsdWfrf"
+def test_cloud_sync_service_configuration_behavior():
+    """Memastikan fallback credentials tidak tertanam dan konfigurasi eksplisit berfungsi."""
+    service_empty = CloudSyncService(url="", key="")
+    assert service_empty.is_configured() is False
+
+    service_configured = CloudSyncService(url="https://test.supabase.co", key="test_key_123")
+    assert service_configured.is_configured() is True
+    assert service_configured.url == "https://test.supabase.co"
+    assert service_configured.key == "test_key_123"
+
+
+def test_direct_patch_prohibited():
+    """F8: Memastikan HTTP PATCH langsung ke tabel pengiriman_linen ditolak keras."""
+    service = CloudSyncService(url="https://test.supabase.co", key="test_key_123")
+    with pytest.raises(RuntimeError, match="DIRECT_PATCH_PROHIBITED"):
+        service.mark_paket_received(101)
 
 
 @patch("httpx.get")
-def test_get_data_cloud_endpoint_success(mock_get):
-    def fake_get(url, headers=None, params=None, timeout=None):
-        mock_resp = MagicMock()
-        mock_resp.raise_for_status.return_value = None
-        if "pengiriman_linen" in url and "detail" not in url:
-            mock_resp.json.return_value = [
-                {
-                    "id": 10,
-                    "verification_code": "PKG-720728",
-                    "supplier": "Test Supplier",
-                    "status": "sent",
-                }
-            ]
-        else:
-            mock_resp.json.return_value = [
-                {
-                    "id": 1,
-                    "pengiriman_id": 10,
-                    "epc": "EPC-TEST-001",
-                    "kategori": "Sprei",
-                    "nama_linen": "Sprei Test",
-                }
-            ]
-        return mock_resp
-
-    mock_get.side_effect = fake_get
-
+def test_get_data_cloud_endpoint_lockdown(mock_get):
+    """
+    Tahap 3B: Jalur pengambilan paket lama ditutup sementara dengan 503
+    dan dipastikan tidak mengirim request HTTP ke cloud.
+    """
     response = client.get("/api/setting/get-data?kode=PKG-720728")
-    assert response.status_code == 200
+    assert response.status_code == 503
     data = response.json()
-    assert data["status"] == "ok"
-    assert data["paket"]["verification_code"] == "PKG-720728"
-    assert len(data["linen_items"]) == 1
-    assert data["linen_items"][0]["epc"] == "EPC-TEST-001"
+    assert "Penerimaan paket belum tersedia" in data["detail"]
+    mock_get.assert_not_called()
