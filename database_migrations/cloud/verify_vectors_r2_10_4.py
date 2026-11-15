@@ -129,6 +129,8 @@ def verify_python_vectors(vectors: list[dict]) -> tuple[int, int]:
         cat = vec.get("category")
         items = vec.get("input_items")
         exp_hash = vec.get("sha256_python")
+        if not exp_hash or not isinstance(exp_hash, str) or not exp_hash.strip():
+            raise ValueError(f"[{vid}] Test vector is missing canonical string key 'sha256_python': {vec}")
         is_rejected = exp_hash.startswith("REJECTED:")
 
         try:
@@ -388,7 +390,9 @@ def run_postgresql_runtime_verification(vectors: list[dict], ddl_path: str) -> b
             vid = vec.get("test_id")
             cat = vec.get("category")
             items = vec.get("input_items")
-            exp_hash = vec.get("sha256_postgres")
+            exp_hash = vec.get("sha256_postgresql")
+            if not exp_hash or not isinstance(exp_hash, str) or not exp_hash.strip():
+                raise ValueError(f"[{vid}] Test vector is missing canonical string key 'sha256_postgresql': {vec}")
             is_rejected = exp_hash.startswith("REJECTED:")
 
             if is_rejected:
