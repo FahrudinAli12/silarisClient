@@ -296,8 +296,8 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
             INSERT INTO public.detail_pengiriman_linen (pengiriman_id, epc)
             VALUES (%s, '3000E280116060000219ABCDEFAA');
         """, (p_pkg_id,))
-        p_cur.execute("COMMIT;")
         p_cur.execute("RESET ROLE;")
+        conn1.commit()
         results["Role P-01 (service_role INSERT capability)"] = "PASS"
 
         # P-02: authenticated DILARANG INSERT langsung
@@ -312,6 +312,7 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
             conn1.rollback()
         finally:
             p_cur.execute("RESET ROLE;")
+            conn1.commit()
         results["Role P-02 (authenticated direct INSERT blocked 42501)"] = "PASS" if p02_code == "42501" else f"FAIL: {p02_code}"
 
         # P-03: authenticated DILARANG membaca verification_code
@@ -325,6 +326,7 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
             conn1.rollback()
         finally:
             p_cur.execute("RESET ROLE;")
+            conn1.commit()
         results["Role P-03 (authenticated verification_code masked 42501)"] = "PASS" if p03_code == "42501" else f"FAIL: {p03_code}"
 
         # P-04: anon DILARANG menjalankan claim_package RPC
@@ -337,6 +339,7 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
             conn1.rollback()
         finally:
             p_cur.execute("RESET ROLE;")
+            conn1.commit()
         results["Role P-04 (anon RPC execute blocked 42501)"] = "PASS" if p04_code == "42501" else f"FAIL: {p04_code}"
 
         # P-05: authenticated DAPAT menjalankan RPC yang diizinkan (P0-03 & P1-01 Fix)
@@ -344,8 +347,8 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
         p_cur.execute("SET request.jwt.claim.sub = %s;", (str(fixtures.get("USER_A_RS_A")),))
         p_cur.execute("SELECT public.get_package_info(%s);", (p_pkg_id,))
         p05_info = p_cur.fetchone()[0]
-        conn1.commit()
         p_cur.execute("RESET ROLE;")
+        conn1.commit()
         p_cur.close()
         assert_idle_connection(conn1, "conn1 (P-05)")
 
@@ -382,8 +385,8 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
         s1_expected_hash = compute_canonical_manifest_hash(scen1_items)
 
         def s1_conn1():
+            c1 = conn1.cursor()
             try:
-                c1 = conn1.cursor()
                 c1.execute("SET ROLE service_role;")
                 c1.execute("BEGIN;")
                 c1.execute("""
@@ -392,18 +395,23 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
                 """, (pkg1_id,))
                 evt_c1_inserted.set()
                 time.sleep(0.6)
-                c1.execute("COMMIT;")
-                c1.execute("RESET ROLE;")
-                c1.close()
+                conn1.commit()
             except Exception as e:
                 conn1.rollback()
                 s1_err[0] = e
+            finally:
+                try:
+                    c1.execute("RESET ROLE;")
+                    conn1.commit()
+                except Exception:
+                    pass
+                c1.close()
 
         def s1_conn2():
+            c2 = conn2.cursor()
             try:
                 if not evt_c1_inserted.wait(timeout=5.0):
                     raise TimeoutError("Conn1 tidak berhasil melakukan insert dalam 5 detik.")
-                c2 = conn2.cursor()
                 c2.execute("SET ROLE authenticated;")
                 c2.execute("SET request.jwt.claim.sub = %s;", (str(user_a_uuid),))
                 # P0-01: Explicit BEGIN
@@ -419,14 +427,19 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
 
                 # P0-01: Validasi JSON SUCCESS & Explicit COMMIT
                 if res.get("status") == "SUCCESS":
-                    c2.execute("COMMIT;")
+                    conn2.commit()
                 else:
-                    c2.execute("ROLLBACK;")
-                c2.execute("RESET ROLE;")
-                c2.close()
+                    conn2.rollback()
             except Exception as e:
                 conn2.rollback()
                 s1_err[1] = e
+            finally:
+                try:
+                    c2.execute("RESET ROLE;")
+                    conn2.commit()
+                except Exception:
+                    pass
+                c2.close()
 
         t1 = threading.Thread(target=s1_conn1, name="s1_thread_conn1")
         t2 = threading.Thread(target=s1_conn2, name="s1_thread_conn2")
@@ -477,8 +490,8 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
         s2_hash = pkg_admin_data[pkg2_id]["manifest_hash"]
 
         def s2_conn1():
+            c1 = conn1.cursor()
             try:
-                c1 = conn1.cursor()
                 c1.execute("SET ROLE authenticated;")
                 c1.execute("SET request.jwt.claim.sub = %s;", (str(user_a_uuid),))
                 c1.execute("BEGIN;")
@@ -493,33 +506,43 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
                     raise RuntimeError(f"Claim gagal pada Skenario 2: {res}")
                 evt_c1_claimed.set()
                 time.sleep(0.6)
-                c1.execute("COMMIT;")
-                c1.execute("RESET ROLE;")
-                c1.close()
+                conn1.commit()
             except Exception as e:
                 conn1.rollback()
                 s2_err[0] = e
+            finally:
+                try:
+                    c1.execute("RESET ROLE;")
+                    conn1.commit()
+                except Exception:
+                    pass
+                c1.close()
 
         def s2_conn2():
+            c2 = conn2.cursor()
             try:
                 if not evt_c1_claimed.wait(timeout=5.0):
                     raise TimeoutError("Conn1 tidak berhasil claim dalam 5 detik.")
-                c2 = conn2.cursor()
                 c2.execute("SET ROLE service_role;")
                 c2.execute("BEGIN;")
                 c2.execute("""
                     INSERT INTO public.detail_pengiriman_linen (pengiriman_id, epc, kategori, nama_linen)
                     VALUES (%s, '3000E280116060000219ABCDEF22', 'Selimut', 'Selimut Tambahan 2');
                 """, (pkg2_id,))
-                c2.execute("COMMIT;")
-                c2.execute("RESET ROLE;")
-                c2.close()
+                conn2.commit()
             except psycopg2.Error as e:
                 s2_rejected_code[0] = e.pgcode
                 conn2.rollback()
             except Exception as e:
                 conn2.rollback()
                 s2_err[1] = e
+            finally:
+                try:
+                    c2.execute("RESET ROLE;")
+                    conn2.commit()
+                except Exception:
+                    pass
+                c2.close()
 
         t1 = threading.Thread(target=s2_conn1, name="s2_thread_conn1")
         t2 = threading.Thread(target=s2_conn2, name="s2_thread_conn2")
@@ -557,13 +580,17 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
         try:
             c3.execute("BEGIN;")
             c3.execute("UPDATE public.detail_pengiriman_linen SET nama_linen = 'Modif Ilegal' WHERE pengiriman_id = %s;", (pkg3_id,))
-            c3.execute("COMMIT;")
+            conn1.commit()
         except psycopg2.Error as e:
             s3_code = e.pgcode
             conn1.rollback()
         finally:
-            c3.execute("RESET ROLE;")
-        c3.close()
+            try:
+                c3.execute("RESET ROLE;")
+                conn1.commit()
+            except Exception:
+                pass
+            c3.close()
         assert_idle_connection(conn1, "conn1 (Skenario 3)")
 
         c_chk3 = monitor_conn.cursor()
@@ -585,13 +612,17 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
         try:
             c3b.execute("BEGIN;")
             c3b.execute("UPDATE public.detail_pengiriman_linen SET nama_linen = 'Modif Pending' WHERE pengiriman_id = %s;", (p_pkg_id,))
-            c3b.execute("COMMIT;")
+            conn1.commit()
         except psycopg2.Error as e:
             s3b_code = e.pgcode
             conn1.rollback()
         finally:
-            c3b.execute("RESET ROLE;")
-        c3b.close()
+            try:
+                c3b.execute("RESET ROLE;")
+                conn1.commit()
+            except Exception:
+                pass
+            c3b.close()
         assert_idle_connection(conn1, "conn1 (Skenario 3B)")
 
         s3b_ok = (s3b_code == "23514")
@@ -608,13 +639,17 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
         try:
             c4.execute("BEGIN;")
             c4.execute("DELETE FROM public.detail_pengiriman_linen WHERE pengiriman_id = %s;", (pkg4_id,))
-            c4.execute("COMMIT;")
+            conn1.commit()
         except psycopg2.Error as e:
             s4_code = e.pgcode
             conn1.rollback()
         finally:
-            c4.execute("RESET ROLE;")
-        c4.close()
+            try:
+                c4.execute("RESET ROLE;")
+                conn1.commit()
+            except Exception:
+                pass
+            c4.close()
         assert_idle_connection(conn1, "conn1 (Skenario 4)")
 
         c_chk4 = monitor_conn.cursor()
@@ -638,30 +673,34 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
         s5_blocked_observed = [False]
 
         def s5_s1():
+            c = conn1.cursor()
             try:
-                c = conn1.cursor()
                 c.execute("BEGIN;")
                 c.execute("SELECT * FROM public.pengiriman_linen WHERE id IN (%s, %s) ORDER BY id ASC FOR UPDATE;", (low_id, high_id))
                 evt_s5_c1_locked.set()
                 time.sleep(0.5)
                 c.execute("COMMIT;")
-                c.close()
+                conn1.commit()
             except Exception as e:
                 conn1.rollback()
                 s5_err[0] = e
+            finally:
+                c.close()
 
         def s5_s2():
+            c = conn2.cursor()
             try:
                 if not evt_s5_c1_locked.wait(timeout=5.0):
                     raise TimeoutError("Conn1 tidak berhasil lock dalam 5 detik.")
-                c = conn2.cursor()
                 c.execute("BEGIN;")
                 c.execute("SELECT * FROM public.pengiriman_linen WHERE id IN (%s, %s) ORDER BY id ASC FOR UPDATE;", (low_id, high_id))
                 c.execute("COMMIT;")
-                c.close()
+                conn2.commit()
             except Exception as e:
                 conn2.rollback()
                 s5_err[1] = e
+            finally:
+                c.close()
 
         t1 = threading.Thread(target=s5_s1, name="s5_thread_conn1")
         t2 = threading.Thread(target=s5_s2, name="s5_thread_conn2")
@@ -691,15 +730,15 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
         s6_committed = {"session_1": False, "session_2": False}
 
         def s6_s1():
+            c = conn1.cursor()
             try:
-                c = conn1.cursor()
                 c.execute("BEGIN;")
                 c.execute("SELECT * FROM public.pengiriman_linen WHERE id = %s FOR UPDATE;", (low_id,))
                 b6.wait(timeout=5.0)
                 time.sleep(0.1)
                 c.execute("SELECT * FROM public.pengiriman_linen WHERE id = %s FOR UPDATE;", (high_id,))
                 c.execute("COMMIT;")
-                c.close()
+                conn1.commit()
                 s6_results["session_1"] = "COMMIT_SUCCESS"
                 s6_committed["session_1"] = True
             except psycopg2.Error as e:
@@ -709,17 +748,19 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
             except Exception as e:
                 s6_results["session_1"] = f"EXCEPTION_{type(e).__name__}"
                 conn1.rollback()
+            finally:
+                c.close()
 
         def s6_s2():
+            c = conn2.cursor()
             try:
-                c = conn2.cursor()
                 c.execute("BEGIN;")
                 c.execute("SELECT * FROM public.pengiriman_linen WHERE id = %s FOR UPDATE;", (high_id,))
                 b6.wait(timeout=5.0)
                 time.sleep(0.1)
                 c.execute("SELECT * FROM public.pengiriman_linen WHERE id = %s FOR UPDATE;", (low_id,))
                 c.execute("COMMIT;")
-                c.close()
+                conn2.commit()
                 s6_results["session_2"] = "COMMIT_SUCCESS"
                 s6_committed["session_2"] = True
             except psycopg2.Error as e:
@@ -729,6 +770,8 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
             except Exception as e:
                 s6_results["session_2"] = f"EXCEPTION_{type(e).__name__}"
                 conn2.rollback()
+            finally:
+                c.close()
 
         t1 = threading.Thread(target=s6_s1, name="s6_thread_conn1")
         t2 = threading.Thread(target=s6_s2, name="s6_thread_conn2")
@@ -762,8 +805,8 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
         s7_err = [None, None]
 
         def s7_conn1():
+            c1 = conn1.cursor()
             try:
-                c1 = conn1.cursor()
                 c1.execute("SET ROLE service_role;")
                 c1.execute("BEGIN;")
                 c1.execute("""
@@ -772,27 +815,30 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
                 """, (pkg7_id,))
                 evt_s7_c1_inserted.set()
                 time.sleep(0.6)
-                c1.execute("COMMIT;")
-                c1.execute("RESET ROLE;")
-                c1.close()
+                conn1.commit()
             except Exception as e:
                 conn1.rollback()
                 s7_err[0] = e
+            finally:
+                try:
+                    c1.execute("RESET ROLE;")
+                    conn1.commit()
+                except Exception:
+                    pass
+                c1.close()
 
         def s7_conn2():
+            c2 = conn2.cursor()
             try:
                 if not evt_s7_c1_inserted.wait(timeout=5.0):
                     raise TimeoutError("Conn1 Skenario 7 tidak selesai insert dalam 5 detik.")
-                c2 = conn2.cursor()
                 c2.execute("SET ROLE service_role;")
                 c2.execute("BEGIN;")
                 c2.execute("""
                     INSERT INTO public.detail_pengiriman_linen (pengiriman_id, epc)
                     VALUES (%s, 'E280116060000219ABCDEF99');
                 """, (pkg7_id,))
-                c2.execute("COMMIT;")
-                c2.execute("RESET ROLE;")
-                c2.close()
+                conn2.commit()
             except psycopg2.Error as e:
                 s7_c2_code[0] = e.pgcode
                 s7_c2_constraint[0] = getattr(e.diag, "constraint_name", None)
@@ -800,6 +846,13 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
             except Exception as e:
                 conn2.rollback()
                 s7_err[1] = e
+            finally:
+                try:
+                    c2.execute("RESET ROLE;")
+                    conn2.commit()
+                except Exception:
+                    pass
+                c2.close()
 
         t1 = threading.Thread(target=s7_conn1, name="s7_thread_conn1")
         t2 = threading.Thread(target=s7_conn2, name="s7_thread_conn2")
@@ -991,7 +1044,9 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
             logger.error("RS B tertahan oleh row lock RS A! SQLSTATE=%s: %s", dos_sqlstate, pge)
         finally:
             try:
+                c2_dos.execute("RESET ROLE;")
                 c2_dos.execute("SET statement_timeout = 0;")
+                conn2.commit()
             except Exception:
                 pass
             c2_dos.close()
@@ -1258,7 +1313,11 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
             "PASS" if p0_01_ok else f"FAIL (rejected={guc_rejected}, code={guc_code}, msg={guc_msg})"
         )
 
-        mt_cur.execute("RESET ROLE;")
+        try:
+            mt_cur.execute("RESET ROLE;")
+            conn1.commit()
+        except Exception:
+            pass
         mt_cur.close()
         assert_idle_connection(conn1, "conn1 (post-multi-tenant)")
     finally:
