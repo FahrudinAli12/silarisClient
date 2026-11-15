@@ -384,6 +384,9 @@ def run_postgresql_runtime_verification(vectors: list[dict], ddl_path: str) -> b
         # Eksekusi DDL R2.10.4
         with open(ddl_path, "r", encoding="utf-8") as f:
             ddl_sql = f.read()
+        # PostgreSQL E'...' string escapes do not interpret \v as vertical tab (ASCII 11);
+        # replace \v with \x0B so PostgreSQL btrim strips vertical tab with 100% parity to Python
+        ddl_sql = ddl_sql.replace(r"\v", r"\x0B")
         cur.execute("SET search_path TO pg_catalog, pg_temp;")
         cur.execute(ddl_sql)
         conn.commit()
@@ -478,9 +481,6 @@ def run_postgresql_runtime_verification(vectors: list[dict], ddl_path: str) -> b
                 """, (f"VC-{vid}",))
                 pkg_id = cur.fetchone()[0]
                 for itm in items:
-                    cur.execute("SELECT public.clean_epc(%s);", (itm.get("epc"),))
-                    dbg_val = cur.fetchone()[0]
-                    print(f"DEBUG [{vid}] clean_epc -> repr={repr(dbg_val)}, len={len(dbg_val) if dbg_val else None}")
                     cur.execute("""
                         INSERT INTO public.detail_pengiriman_linen (pengiriman_id, epc, kategori, nama_linen)
                         VALUES (%s, %s, %s, %s);

@@ -229,6 +229,7 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
     logger.info("Langkah 9: Menjalankan DDL Konsolidasi R2.10.4...")
     with open(ddl_path, "r", encoding="utf-8") as f:
         ddl_sql = f.read()
+    ddl_sql = ddl_sql.replace(r"\v", r"\x0B")
     cur_admin.execute("SET search_path TO pg_catalog, pg_temp;")
     cur_admin.execute(ddl_sql)
     cur_admin.execute('SET search_path TO "$user", public;')
