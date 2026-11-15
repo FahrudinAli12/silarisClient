@@ -237,6 +237,11 @@ CREATE TABLE IF NOT EXISTS public.rumah_sakit (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+INSERT INTO public.rumah_sakit (id, kode_rs, nama_rs, is_active)
+OVERRIDING SYSTEM VALUE
+VALUES (101, 'RS-TEST-101', 'Rumah Sakit Test Vector', TRUE)
+ON CONFLICT (id) DO NOTHING;
+
 CREATE TABLE IF NOT EXISTS public.hospital_memberships (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
