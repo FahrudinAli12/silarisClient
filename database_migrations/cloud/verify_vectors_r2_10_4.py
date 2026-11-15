@@ -478,6 +478,9 @@ def run_postgresql_runtime_verification(vectors: list[dict], ddl_path: str) -> b
                 """, (f"VC-{vid}",))
                 pkg_id = cur.fetchone()[0]
                 for itm in items:
+                    cur.execute("SELECT public.clean_epc(%s);", (itm.get("epc"),))
+                    dbg_val = cur.fetchone()[0]
+                    print(f"DEBUG [{vid}] clean_epc -> repr={repr(dbg_val)}, len={len(dbg_val) if dbg_val else None}")
                     cur.execute("""
                         INSERT INTO public.detail_pengiriman_linen (pengiriman_id, epc, kategori, nama_linen)
                         VALUES (%s, %s, %s, %s);
