@@ -218,7 +218,7 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
         CREATE TABLE IF NOT EXISTS public.detail_pengiriman_linen (
             id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
             pengiriman_id BIGINT NOT NULL REFERENCES public.pengiriman_linen(id) ON DELETE RESTRICT,
-            epc VARCHAR NOT NULL,
+            epc TEXT NOT NULL,
             kategori VARCHAR NULL,
             nama_linen VARCHAR NULL,
             created_at TIMESTAMPTZ NULL DEFAULT clock_timestamp()
@@ -229,7 +229,9 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
     logger.info("Langkah 9: Menjalankan DDL Konsolidasi R2.10.4...")
     with open(ddl_path, "r", encoding="utf-8") as f:
         ddl_sql = f.read()
+    cur_admin.execute("SET search_path TO pg_catalog, pg_temp;")
     cur_admin.execute(ddl_sql)
+    cur_admin.execute('SET search_path TO "$user", public;')
     logger.info("DDL R2.10.4 berhasil diaplikasikan.")
 
     # Langkah 10: Jalankan SQL fixture harness

@@ -271,7 +271,7 @@ CREATE TABLE IF NOT EXISTS public.pengiriman_linen (
 CREATE TABLE IF NOT EXISTS public.detail_pengiriman_linen (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     pengiriman_id BIGINT NOT NULL REFERENCES public.pengiriman_linen(id) ON DELETE RESTRICT,
-    epc VARCHAR NOT NULL,
+    epc TEXT NOT NULL,
     kategori VARCHAR NULL,
     nama_linen VARCHAR NULL,
     created_at TIMESTAMPTZ NULL DEFAULT clock_timestamp()
@@ -376,7 +376,10 @@ def run_postgresql_runtime_verification(vectors: list[dict], ddl_path: str) -> b
         # Eksekusi DDL R2.10.4
         with open(ddl_path, "r", encoding="utf-8") as f:
             ddl_sql = f.read()
+        cur.execute("SET search_path TO pg_catalog, pg_temp;")
         cur.execute(ddl_sql)
+        conn.commit()
+        cur.execute('SET search_path TO "$user", public;')
         conn.commit()
 
         print("=" * 80)
