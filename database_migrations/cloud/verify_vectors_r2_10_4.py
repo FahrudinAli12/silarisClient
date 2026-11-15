@@ -347,28 +347,45 @@ def run_postgresql_runtime_verification(vectors: list[dict], ddl_path: str) -> b
         if not wait_for_postgres(container_name, timeout_seconds=30):
             raise TimeoutError("PostgreSQL container tidak siap dalam waktu 30 detik.")
 
-        admin_conn = psycopg2.connect(
-            host="127.0.0.1",
-            port=port,
-            user="postgres",
-            password=db_pass,
-            dbname="postgres",
-            connect_timeout=10,
-        )
+        admin_conn = None
+        for attempt in range(10):
+            try:
+                admin_conn = psycopg2.connect(
+                    host="127.0.0.1",
+                    port=port,
+                    user="postgres",
+                    password=db_pass,
+                    dbname="postgres",
+                    connect_timeout=5,
+                )
+                break
+            except psycopg2.OperationalError:
+                if attempt == 9:
+                    raise
+                time.sleep(1.0)
+
         admin_conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         cur = admin_conn.cursor()
         cur.execute(sql.SQL("CREATE DATABASE {} WITH ENCODING 'UTF8'").format(sql.Identifier(disposable_db_name)))
         cur.close()
         admin_conn.close()
 
-        conn = psycopg2.connect(
-            host="127.0.0.1",
-            port=port,
-            user="postgres",
-            password=db_pass,
-            dbname=disposable_db_name,
-            connect_timeout=10,
-        )
+        conn = None
+        for attempt in range(10):
+            try:
+                conn = psycopg2.connect(
+                    host="127.0.0.1",
+                    port=port,
+                    user="postgres",
+                    password=db_pass,
+                    dbname=disposable_db_name,
+                    connect_timeout=5,
+                )
+                break
+            except psycopg2.OperationalError:
+                if attempt == 9:
+                    raise
+                time.sleep(1.0)
         conn.set_client_encoding('UTF8')
         conn.autocommit = False
         cur = conn.cursor()
