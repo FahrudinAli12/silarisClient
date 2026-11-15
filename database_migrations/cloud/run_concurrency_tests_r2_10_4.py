@@ -36,6 +36,22 @@ try:
 except ImportError:
     HAS_PSYCOPG2 = False
 
+# P1-02: Reproducible Test Package & Flexible PYTHONPATH Discovery
+script_dir = os.path.dirname(os.path.abspath(__file__))
+repo_root = os.path.dirname(os.path.dirname(script_dir))
+for p in [repo_root, os.getcwd(), script_dir, os.path.join(repo_root, "app", "services"), os.path.join(os.getcwd(), "app", "services")]:
+    if p and os.path.exists(p) and p not in sys.path:
+        sys.path.insert(0, p)
+
+try:
+    from app.services.manifest_service import compute_canonical_manifest_hash
+except ImportError:
+    try:
+        from manifest_service import compute_canonical_manifest_hash
+    except ImportError as e:
+        logger.warning("Tidak dapat mengimpor manifest_service: %s", e)
+        compute_canonical_manifest_hash = None
+
 
 def check_docker_available() -> bool:
     """Memeriksa ketersediaan Docker daemon lokal sesuai P1-06."""
