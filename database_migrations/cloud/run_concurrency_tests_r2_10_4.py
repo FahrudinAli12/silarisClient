@@ -204,6 +204,33 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
             created_at TIMESTAMPTZ DEFAULT clock_timestamp(),
             CONSTRAINT uq_hospital_memberships_user_hospital UNIQUE (user_id, hospital_id)
         );
+
+        REVOKE ALL ON TABLE public.rumah_sakit FROM anon, public;
+        REVOKE ALL ON TABLE public.hospital_memberships FROM anon, public;
+        GRANT SELECT ON TABLE public.rumah_sakit TO authenticated;
+        GRANT SELECT ON TABLE public.hospital_memberships TO authenticated;
+        GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.rumah_sakit TO service_role;
+        GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.hospital_memberships TO service_role;
+        ALTER TABLE public.rumah_sakit ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE public.hospital_memberships ENABLE ROW LEVEL SECURITY;
+        CREATE POLICY p_hospital_memberships_select_self
+        ON public.hospital_memberships
+        FOR SELECT
+        TO authenticated
+        USING (user_id = auth.uid());
+        CREATE POLICY p_rumah_sakit_select_member
+        ON public.rumah_sakit
+        FOR SELECT
+        TO authenticated
+        USING (
+            is_active = TRUE
+            AND id IN (
+                SELECT hm.hospital_id
+                FROM public.hospital_memberships hm
+                WHERE hm.user_id = auth.uid()
+                  AND hm.is_active = TRUE
+            )
+        );
     """)
 
     # Langkah 8: Bootstrap tabel operasional
