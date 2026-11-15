@@ -618,7 +618,6 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
         logger.info("Menjalankan Skenario 3: UPDATE detail immutability pada paket claimed...")
         pkg3_id = fixtures.get("SCEN3_PKG")
         c3 = conn1.cursor()
-        c3.execute("SET ROLE service_role;")
         s3_code = None
         try:
             c3.execute("BEGIN;")
@@ -628,11 +627,6 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
             s3_code = e.pgcode
             conn1.rollback()
         finally:
-            try:
-                c3.execute("RESET ROLE;")
-                conn1.commit()
-            except Exception:
-                pass
             c3.close()
         assert_idle_connection(conn1, "conn1 (Skenario 3)")
 
@@ -650,7 +644,6 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
         # =====================================================================
         logger.info("Menjalankan Skenario 3B: UPDATE detail immutability pada paket pending...")
         c3b = conn1.cursor()
-        c3b.execute("SET ROLE service_role;")
         s3b_code = None
         try:
             c3b.execute("BEGIN;")
@@ -660,11 +653,6 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
             s3b_code = e.pgcode
             conn1.rollback()
         finally:
-            try:
-                c3b.execute("RESET ROLE;")
-                conn1.commit()
-            except Exception:
-                pass
             c3b.close()
         assert_idle_connection(conn1, "conn1 (Skenario 3B)")
 
@@ -677,7 +665,6 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
         logger.info("Menjalankan Skenario 4: DELETE detail immutability pada paket claimed...")
         pkg4_id = fixtures.get("SCEN4_PKG")
         c4 = conn1.cursor()
-        c4.execute("SET ROLE service_role;")
         s4_code = None
         try:
             c4.execute("BEGIN;")
@@ -687,11 +674,6 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
             s4_code = e.pgcode
             conn1.rollback()
         finally:
-            try:
-                c4.execute("RESET ROLE;")
-                conn1.commit()
-            except Exception:
-                pass
             c4.close()
         assert_idle_connection(conn1, "conn1 (Skenario 4)")
 
@@ -1266,6 +1248,7 @@ def run_full_concurrency_suite(port: int, db_pass: str, disposable_db_name: str,
         else:
             conn1.rollback()
 
+        mt_cur.execute("SET request.jwt.claim.sub = %s;", (str(user_deact_uuid),))
         mt_cur.execute("""
             SELECT public.confirm_package(
                 %s, 101, 'op_opt_j_conf', 'inst_node_j',
