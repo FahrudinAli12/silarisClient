@@ -1319,6 +1319,8 @@ def run_tests():
         "docker", "run", "-d",
         "--name", container_name,
         "-e", f"POSTGRES_PASSWORD={db_pass}",
+        "-e", "LANG=C.UTF-8",
+        "-e", "POSTGRES_INITDB_ARGS=--encoding=UTF8",
         "-p", f"127.0.0.1:{port}:5432",
         "postgres:15-alpine"
     ]
@@ -1332,7 +1334,7 @@ def run_tests():
         admin_conn = psycopg2.connect(host="127.0.0.1", port=port, user="postgres", password=db_pass, dbname="postgres")
         admin_conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         cur = admin_conn.cursor()
-        cur.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(disposable_db_name)))
+        cur.execute(sql.SQL("CREATE DATABASE {} WITH ENCODING 'UTF8'").format(sql.Identifier(disposable_db_name)))
         cur.close()
         admin_conn.close()
 
