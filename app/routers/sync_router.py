@@ -5,10 +5,15 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.pengiriman_temp import PengirimanTemp
+from app.services.auth_dependencies import require_active_session
 from app.services.supabase_service import SupabaseService
 from app.services.sync_service import SyncService
 
-router = APIRouter(prefix="/sync", tags=["sync"])
+router = APIRouter(
+    prefix="/sync",
+    tags=["sync"],
+    dependencies=[Depends(require_active_session)],
+)
 
 
 @router.get("/status")

@@ -7,6 +7,7 @@ from app.models.riwayat_linen import RiwayatLinen
 from app.models.reader_device import ReaderDevice
 from app.models.pengiriman_temp import PengirimanTemp
 from app.models.rumah_sakit import RumahSakit
+from app.models.paket_receiving_operation import PaketReceivingOperation
 
 __all__ = [
     "Base",
@@ -18,4 +19,5 @@ __all__ = [
     "ReaderDevice",
     "PengirimanTemp",
     "RumahSakit",
+    "PaketReceivingOperation",
 ]

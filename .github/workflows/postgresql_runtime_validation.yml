@@ -1,0 +1,45 @@
+name: PostgreSQL 15+ Runtime & Concurrency Validation
+
+'on':
+  workflow_dispatch:
+  push:
+    branches: [ main, master, 'audit/**' ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  validate-postgresql-runtime:
+    name: PostgreSQL 15+ Automated Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install psycopg2-binary pytest
+
+      - name: 1. Verify Static DDL Sanity (16 Invariants)
+        run: |
+          python database_migrations/cloud/verify_ddl_r2_10_4.py
+
+      - name: 2. Verify Manifest Hash Vectors & Schema Parity (12 Vectors)
+        run: |
+          python database_migrations/cloud/verify_vectors_r2_10_4.py
+
+      - name: 3. Execute PostgreSQL Concurrency & Tenant Acceptance Tests (10 Tenant Tests, 7 Concurrency Scenarios)
+        run: |
+          python database_migrations/cloud/run_concurrency_tests_r2_10_4.py
+
+      - name: 4. Re-run Full Pytest Regression Suite (75 Tests)
+        run: |
+          pytest tests/test_phase4d_local_room_and_rbac.py tests/test_phase4c_receiving_api.py tests/test_phase4_receiving_coordinator.py tests/test_r2_9_supabase_integration.py -v

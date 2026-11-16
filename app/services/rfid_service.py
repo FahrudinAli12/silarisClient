@@ -6,9 +6,11 @@ import os
 import threading
 import time
 from datetime import datetime
-from typing import Callable, Optional
+from typing import Callable, Optional, Sequence
 
 from fastapi import WebSocket
+
+from app.services.cloud_sync_service import clean_epc
 
 try:
     import serial
@@ -33,6 +35,98 @@ def list_available_ports() -> list[str]:
         return [p.device for p in ports]
     except Exception:
         return []
+
+
+class RFIDScanSession:
+    """Sesi pemindaian RFID terikat pada satu operasi dan satu paket linen."""
+
+    def __init__(
+        self,
+        operation_id: str,
+        paket_id: int,
+        reader_name: Optional[str] = None,
+        port: Optional[str] = None,
+    ) -> None:
+        if not operation_id or not str(operation_id).strip():
+            raise ValueError("operation_id wajib diisi.")
+        self.operation_id = str(operation_id).strip()
+        self.paket_id = int(paket_id)
+        self.reader_name: Optional[str] = reader_name
+        self.port: Optional[str] = port
+        self._raw_epcs: set[str] = set()
+        self.snapshot_epcs: tuple[str, ...] = ()
+        self.is_frozen: bool = False
+        self.is_invalidated: bool = False
+        self.invalidation_reason: Optional[str] = None
+        self._lock = threading.Lock()
+
+    def add_epc(self, epc: str) -> None:
+        """Tambahkan EPC terdeteksi. Ditolak jika sesi sudah dibekukan atau diinvalidasi."""
+        with self._lock:
+            if self.is_invalidated:
+                raise RuntimeError("Scan session has been invalidated.")
+            if self.is_frozen:
+                raise RuntimeError("Scan session is frozen. Cannot add new EPCs.")
+            normalized = clean_epc(epc)
+            if normalized:
+                self._raw_epcs.add(normalized)
+
+    def freeze_snapshot(self) -> tuple[str, ...]:
+        """Bekukan snapshot EPC menjadi tuple immutable."""
+        with self._lock:
+            if self.is_invalidated:
+                raise RuntimeError("Scan session has been invalidated.")
+            if not self.is_frozen:
+                self.snapshot_epcs = tuple(sorted(self._raw_epcs))
+                self.is_frozen = True
+            return self.snapshot_epcs
+
+    def get_snapshot(self) -> tuple[str, ...]:
+        """Ambil snapshot EPC yang telah dibekukan."""
+        with self._lock:
+            if not self.is_frozen:
+                raise RuntimeError("Snapshot has not been frozen yet.")
+            return self.snapshot_epcs
+
+    def bind_to_package(self, paket_id: int) -> None:
+        """Validasi bahwa snapshot terikat pada paket_id yang sama."""
+        if int(paket_id) != self.paket_id:
+            raise ValueError(f"Snapshot terikat pada paket {self.paket_id}, tidak dapat dipakai oleh paket {paket_id}.")
+
+    def bind_to_operation(self, operation_id: str) -> None:
+        """Validasi bahwa snapshot terikat pada operation_id yang sama."""
+        if str(operation_id).strip() != self.operation_id:
+            raise ValueError(f"Snapshot terikat pada operation {self.operation_id}, tidak dapat dipakai oleh operation {operation_id}.")
+
+    def verify_manifest_match(self, manifest_epcs: Sequence[str]) -> bool:
+        """Verifikasi kecocokan 100% antara snapshot hasil scan dan manifest cloud."""
+        with self._lock:
+            if not self.is_frozen:
+                self.freeze_snapshot()
+            scanned_set = set(self.snapshot_epcs)
+            manifest_set = set(clean_epc(e) for e in manifest_epcs if clean_epc(e))
+            if not manifest_set or not scanned_set:
+                return False
+            return scanned_set == manifest_set
+
+    def notify_hardware_disconnect(self, reason: Optional[str] = None) -> None:
+        """Invalidasi sesi pemindaian jika reader terputus atau port berubah sebelum commit."""
+        with self._lock:
+            self.is_invalidated = True
+            if reason:
+                self.invalidation_reason = reason
+
+    def validate_for_commit(self) -> bool:
+        """Pemeriksaan kelayakan sebelum transaksi commit lokal."""
+        with self._lock:
+            if self.is_invalidated:
+                msg = f"Scan session is invalidated due to hardware disconnect or port change: {self.invalidation_reason or 'hardware_disconnect'}"
+                raise RuntimeError(msg)
+            if not self.is_frozen:
+                raise RuntimeError("Scan session snapshot has not been frozen.")
+            if not self.snapshot_epcs:
+                raise RuntimeError("Scan session snapshot is empty.")
+            return True
 
 
 class SingleRFIDReader:
@@ -349,6 +443,10 @@ class RFIDServiceManager:
         self._lock = threading.Lock()
         self._loop: asyncio.AbstractEventLoop | None = None
 
+        # Registry sesi scan aktif untuk pemantauan diskoneksi hardware atau perubahan port
+        self._active_scan_sessions: dict[str, RFIDScanSession] = {}
+        self._sessions_lock = threading.Lock()
+
         # Mode transaksi aktif saat ini ("LINEN_MASUK" atau "LINEN_KELUAR")
         self.active_transaction_mode: str = "LINEN_MASUK"
         self.incoming_reader._inventory_active = True
@@ -475,8 +573,37 @@ class RFIDServiceManager:
             "port": detection["port_label"],
         }
 
+    def register_scan_session(self, session: RFIDScanSession) -> None:
+        """Daftarkan sesi scan aktif untuk pemantauan diskoneksi hardware atau perubahan port."""
+        with self._sessions_lock:
+            self._active_scan_sessions[session.operation_id] = session
+
+    def unregister_scan_session(self, session_or_op_id: Any) -> None:
+        """Hapus sesi scan dari registry saat operasi selesai atau dibatalkan."""
+        op_id = session_or_op_id.operation_id if hasattr(session_or_op_id, "operation_id") else str(session_or_op_id)
+        with self._sessions_lock:
+            self._active_scan_sessions.pop(op_id, None)
+
+    def get_active_scan_session(self, operation_id: str) -> Optional[RFIDScanSession]:
+        """Ambil sesi scan aktif berdasarkan operation_id."""
+        with self._sessions_lock:
+            return self._active_scan_sessions.get(operation_id)
+
     def change_port(self, new_port: str, target: str = "masuk") -> None:
         """Ganti port serial secara dinamis (target: 'masuk' / 'keluar' / 'all')."""
+        target_reader = self.outgoing_reader if target == "keluar" else self.incoming_reader
+        old_port = target_reader.port
+
+        # Otomatis invalidasi sesi scan aktif yang terkait dengan reader/port yang diubah
+        with self._sessions_lock:
+            active_sessions = list(self._active_scan_sessions.values())
+        for sess in active_sessions:
+            if sess.reader_name and sess.reader_name != target_reader.name:
+                continue
+            if sess.port and sess.port != old_port:
+                continue
+            sess.notify_hardware_disconnect(f"Port changed from {old_port} to {new_port} for {target_reader.name}")
+
         available = list_available_ports()
         if target == "keluar":
             self.outgoing_reader.change_port(new_port)
@@ -602,6 +729,17 @@ class RFIDServiceManager:
             self._loop.call_soon_threadsafe(lambda: asyncio.create_task(self._broadcast_json(payload)))
 
     def _handle_reader_status(self, connected: bool, reader: SingleRFIDReader) -> None:
+        if not connected:
+            # Otomatis invalidasi sesi scan aktif yang terkait dengan reader yang disconnect
+            with self._sessions_lock:
+                active_sessions = list(self._active_scan_sessions.values())
+            for sess in active_sessions:
+                if sess.reader_name and sess.reader_name != reader.name:
+                    continue
+                if sess.port and sess.port != reader.port:
+                    continue
+                sess.notify_hardware_disconnect(f"Reader {reader.name} on port {reader.port} disconnected")
+
         detection = self.detect_active_rfid_readers()
 
         is_masuk_active = self.active_transaction_mode == "LINEN_MASUK"

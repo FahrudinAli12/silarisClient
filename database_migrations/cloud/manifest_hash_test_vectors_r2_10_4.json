@@ -1,0 +1,244 @@
+[
+  {
+    "test_id": "TV-01",
+    "category": "PREFIX_3000_TRUNCATION",
+    "description": "EPC 28 karakter diawali 3000 dipotong 4 karakter prefix menjadi 24 karakter heksadesimal",
+    "input_items": [
+      {
+        "epc": "3000E280116060000219ABCDEF12",
+        "kategori": "Sprei",
+        "nama_linen": "Sprei Operasi"
+      }
+    ],
+    "normalized_epcs": [
+      "E280116060000219ABCDEF12"
+    ],
+    "canonical_stream": "24:E280116060000219ABCDEF12:5:Sprei:13:Sprei Operasi;",
+    "sha256_python": "eb6b939c98bc3b5704408ad95d24200232e921a3f8cdb57fdb79faf231937800",
+    "sha256_postgresql": "eb6b939c98bc3b5704408ad95d24200232e921a3f8cdb57fdb79faf231937800",
+    "match_status": "MATCH_100_PERCENT"
+  },
+  {
+    "test_id": "TV-02",
+    "category": "STANDARD_24_HEX",
+    "description": "EPC standar 24 karakter heksadesimal tanpa prefix 3000 (identik dengan hasil TV-01)",
+    "input_items": [
+      {
+        "epc": "E280116060000219ABCDEF12",
+        "kategori": "Sprei",
+        "nama_linen": "Sprei Operasi"
+      }
+    ],
+    "normalized_epcs": [
+      "E280116060000219ABCDEF12"
+    ],
+    "canonical_stream": "24:E280116060000219ABCDEF12:5:Sprei:13:Sprei Operasi;",
+    "sha256_python": "eb6b939c98bc3b5704408ad95d24200232e921a3f8cdb57fdb79faf231937800",
+    "sha256_postgresql": "eb6b939c98bc3b5704408ad95d24200232e921a3f8cdb57fdb79faf231937800",
+    "match_status": "MATCH_100_PERCENT"
+  },
+  {
+    "test_id": "TV-03",
+    "category": "LOWERCASE_NORMALIZATION",
+    "description": "EPC huruf kecil dinormalisasi menjadi huruf besar uppercase (identik dengan TV-01 & TV-02)",
+    "input_items": [
+      {
+        "epc": "e280116060000219abcdef12",
+        "kategori": "Sprei",
+        "nama_linen": "Sprei Operasi"
+      }
+    ],
+    "normalized_epcs": [
+      "E280116060000219ABCDEF12"
+    ],
+    "canonical_stream": "24:E280116060000219ABCDEF12:5:Sprei:13:Sprei Operasi;",
+    "sha256_python": "eb6b939c98bc3b5704408ad95d24200232e921a3f8cdb57fdb79faf231937800",
+    "sha256_postgresql": "eb6b939c98bc3b5704408ad95d24200232e921a3f8cdb57fdb79faf231937800",
+    "match_status": "MATCH_100_PERCENT"
+  },
+  {
+    "test_id": "TV-04",
+    "category": "WHITESPACE_STRIPPING",
+    "description": "Whitespace stripping menyeluruh: spasi, tab, newline, CR, VT, FF, NBSP, em space, ideographic space pada EPC, kategori, dan nama_linen (paritas penuh dengan Python str.strip())",
+    "input_items": [
+      {
+        "epc": " \t\r\n\u000b\f  　E280116060000219ABCDEF12 \t\r\n\u000b\f  　",
+        "kategori": " \t Sprei \r\n ",
+        "nama_linen": "　Sprei Operasi\u000b\f "
+      }
+    ],
+    "normalized_epcs": [
+      "E280116060000219ABCDEF12"
+    ],
+    "canonical_stream": "24:E280116060000219ABCDEF12:5:Sprei:13:Sprei Operasi;",
+    "sha256_python": "eb6b939c98bc3b5704408ad95d24200232e921a3f8cdb57fdb79faf231937800",
+    "sha256_postgresql": "eb6b939c98bc3b5704408ad95d24200232e921a3f8cdb57fdb79faf231937800",
+    "match_status": "MATCH_100_PERCENT"
+  },
+  {
+    "test_id": "TV-05",
+    "category": "UNICODE_NFC",
+    "description": "Metadata mengandung karakter beraksen Unicode bentuk precomposed (NFC)",
+    "input_items": [
+      {
+        "epc": "E280116060000219ABCDEF05",
+        "kategori": "Linen",
+        "nama_linen": "Selimut Étage"
+      }
+    ],
+    "normalized_epcs": [
+      "E280116060000219ABCDEF05"
+    ],
+    "canonical_stream": "24:E280116060000219ABCDEF05:5:Linen:14:Selimut Étage;",
+    "sha256_python": "16e5e5111343c968b107afe247e2d3aaec54cd07927522344b014b08edfc4c5a",
+    "sha256_postgresql": "16e5e5111343c968b107afe247e2d3aaec54cd07927522344b014b08edfc4c5a",
+    "match_status": "MATCH_100_PERCENT"
+  },
+  {
+    "test_id": "TV-06",
+    "category": "UNICODE_NFD_TO_NFC",
+    "description": "Metadata Unicode bentuk decomposed (NFD) wajib dinormalisasi menjadi NFC (paritas 100% dengan TV-05)",
+    "input_items": [
+      {
+        "epc": "E280116060000219ABCDEF05",
+        "kategori": "Linen",
+        "nama_linen": "Selimut Étage"
+      }
+    ],
+    "normalized_epcs": [
+      "E280116060000219ABCDEF05"
+    ],
+    "canonical_stream": "24:E280116060000219ABCDEF05:5:Linen:14:Selimut Étage;",
+    "sha256_python": "16e5e5111343c968b107afe247e2d3aaec54cd07927522344b014b08edfc4c5a",
+    "sha256_postgresql": "16e5e5111343c968b107afe247e2d3aaec54cd07927522344b014b08edfc4c5a",
+    "match_status": "MATCH_100_PERCENT"
+  },
+  {
+    "test_id": "TV-07",
+    "category": "EMPTY_METADATA",
+    "description": "Kategori dan nama linen string kosong menghasilkan field length-prefixed 0::0:;",
+    "input_items": [
+      {
+        "epc": "E280116060000219ABCDEF07",
+        "kategori": "",
+        "nama_linen": ""
+      }
+    ],
+    "normalized_epcs": [
+      "E280116060000219ABCDEF07"
+    ],
+    "canonical_stream": "24:E280116060000219ABCDEF07:0::0:;",
+    "sha256_python": "9236caf524a501953160921b6ae6294d19a70744cfba092c7265782a7cc045c2",
+    "sha256_postgresql": "9236caf524a501953160921b6ae6294d19a70744cfba092c7265782a7cc045c2",
+    "match_status": "MATCH_100_PERCENT"
+  },
+  {
+    "test_id": "TV-08",
+    "category": "CANONICAL_SORTING",
+    "description": "Item input dengan urutan acak terurut secara leksikografis deterministik berdasarkan normalized EPC",
+    "input_items": [
+      {
+        "epc": "E280116060000219ABCDEF02",
+        "kategori": "Linen",
+        "nama_linen": "Selimut B"
+      },
+      {
+        "epc": "E280116060000219ABCDEF01",
+        "kategori": "Linen",
+        "nama_linen": "Sprei A"
+      }
+    ],
+    "normalized_epcs": [
+      "E280116060000219ABCDEF01",
+      "E280116060000219ABCDEF02"
+    ],
+    "canonical_stream": "24:E280116060000219ABCDEF01:5:Linen:7:Sprei A;24:E280116060000219ABCDEF02:5:Linen:9:Selimut B;",
+    "sha256_python": "4f0dcd77f44d960121f37fd5035abad2673ee8e7b5606e4dbca23b092a13106d",
+    "sha256_postgresql": "4f0dcd77f44d960121f37fd5035abad2673ee8e7b5606e4dbca23b092a13106d",
+    "match_status": "MATCH_100_PERCENT"
+  },
+  {
+    "test_id": "TV-09",
+    "category": "DUPLICATE_EPC_REJECTION",
+    "description": "Duplikasi tag EPC setelah normalisasi ditolak: Python menghasilkan ValueError(DUPLICATE_MANIFEST_EPC), PostgreSQL menegakkan Unique Functional Index uq_detail_pengiriman_linen_epc_clean (SQLSTATE 23505)",
+    "input_items": [
+      {
+        "epc": "E280116060000219ABCDEF01",
+        "kategori": "Linen",
+        "nama_linen": "Item Asli"
+      },
+      {
+        "epc": "3000E280116060000219ABCDEF01",
+        "kategori": "Linen",
+        "nama_linen": "Item Duplikat Prefix 3000"
+      }
+    ],
+    "normalized_epcs": [
+      "E280116060000219ABCDEF01"
+    ],
+    "canonical_stream": null,
+    "sha256_python": "REJECTED: DUPLICATE_MANIFEST_EPC",
+    "sha256_postgresql": "REJECTED: SQLSTATE 23505 (DUPLICATE_EPC / uq_detail_pengiriman_linen_epc_clean)",
+    "match_status": "MATCH_REJECTION_PARITY",
+    "rejection_layer_python": "Manifest Hash Validator: ValueError(DUPLICATE_MANIFEST_EPC)",
+    "rejection_layer_postgresql": "Unique Functional Index uq_detail_pengiriman_linen_epc_clean: SQLSTATE 23505 (unique_violation)"
+  },
+  {
+    "test_id": "TV-10",
+    "category": "INVALID_EPC_FORMAT_REJECTION",
+    "description": "EPC non-heksadesimal atau bukan 24 karakter ditolak oleh Invarian 13A dan compute_package_manifest_hash",
+    "input_items": [
+      {
+        "epc": "INVALID_EPC_FORMAT_XYZ",
+        "kategori": "Linen",
+        "nama_linen": "Tag Rusak"
+      }
+    ],
+    "normalized_epcs": [
+      "INVALID_EPC_FORMAT_XYZ"
+    ],
+    "canonical_stream": null,
+    "sha256_python": "REJECTED: INVALID_EPC_FORMAT",
+    "sha256_postgresql": "REJECTED: SQLSTATE 22000 (INVALID_EPC_FORMAT)",
+    "match_status": "MATCH_REJECTION_PARITY"
+  },
+  {
+    "test_id": "TV-11",
+    "category": "EMPTY_MANIFEST_REJECTION",
+    "description": "Manifest tanpa item detail linen (0 items) ditolak oleh Invarian 12 dan compute_package_manifest_hash",
+    "input_items": [],
+    "normalized_epcs": [],
+    "canonical_stream": null,
+    "sha256_python": "REJECTED: EMPTY_MANIFEST",
+    "sha256_postgresql": "REJECTED: SQLSTATE 22000 (EMPTY_MANIFEST)",
+    "match_status": "MATCH_REJECTION_PARITY"
+  },
+  {
+    "test_id": "TV-12",
+    "category": "RAW_DIFFERENT_CANONICAL_IDENTICAL",
+    "description": "Dua EPC dengan format mentah berbeda (prefix 3000 vs lowercase spasi) menghasilkan hash kanonikal 100% identik secara mandiri",
+    "input_items": {
+      "variant_a": [
+        {
+          "epc": "3000E280116060000219ABCDEF12",
+          "kategori": "Sprei",
+          "nama_linen": "Sprei"
+        }
+      ],
+      "variant_b": [
+        {
+          "epc": "  e280116060000219abcdef12  ",
+          "kategori": "Sprei",
+          "nama_linen": "Sprei"
+        }
+      ]
+    },
+    "normalized_epcs": [
+      "E280116060000219ABCDEF12"
+    ],
+    "canonical_stream": "24:E280116060000219ABCDEF12:5:Sprei:5:Sprei;",
+    "sha256_python": "d6d495320cf7eefa7790b7e76d918023a60b1d05c0eb6bd246947aa45d1613e5",
+    "sha256_postgresql": "d6d495320cf7eefa7790b7e76d918023a60b1d05c0eb6bd246947aa45d1613e5",
+    "match_status": "MATCH_100_PERCENT"
+  }
+]

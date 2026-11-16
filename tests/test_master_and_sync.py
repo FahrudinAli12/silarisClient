@@ -62,33 +62,22 @@ def test_master_crud_and_sync_buffer():
     assert after_delete.status_code == 404
 
 
-def test_simpan_data_creates_riwayat():
+def test_simpan_data_endpoint_lockdown():
     from unittest.mock import patch
     init_db()
 
-    mock_cloud_data = {
-        "paket": {"id": 100, "kode": "PKT-TEST-99"},
-        "linen_items": [
-            {"epc": "E2801191A000000000000001", "kategori": "Handuk", "nama_linen": "Handuk Test"}
-        ]
+    payload = {
+        "verification_code": "PKT-TEST-99",
+        "petugas": "Petugas Test",
+        "paket_id": 100,
+        "linen_terdaftar": [
+            {"id": 1, "epc": "E2801191A000000000000001", "kategori": "Handuk", "nama_linen": "Handuk Test"}
+        ],
     }
+    with patch("app.routers.setting_router.CloudSyncService.mark_paket_received") as mock_mark:
+        res = client.post("/api/setting/simpan-data", json=payload, headers={"X-ClientS-Request": "1"})
+        assert res.status_code == 503
+        assert "Penerimaan paket belum tersedia" in res.json()["detail"]
+        mock_mark.assert_not_called()
 
-    with patch("app.routers.setting_router.CloudSyncService.get_paket_by_kode", return_value=mock_cloud_data), \
-         patch("app.routers.setting_router.CloudSyncService.mark_paket_received", return_value=True):
-        payload = {
-            "verification_code": "PKT-TEST-99",
-            "petugas": "Petugas Test",
-            "paket_id": 100,
-            "linen_terdaftar": [
-                {"id": 1, "epc": "E2801191A000000000000001", "kategori": "Handuk", "nama_linen": "Handuk Test"}
-            ]
-        }
-        res = client.post("/api/setting/simpan-data", json=payload)
-        assert res.status_code == 200, res.text
-
-    riwayat_res = client.get("/api/transaksi/riwayat")
-    assert riwayat_res.status_code == 200
-    riwayat_items = riwayat_res.json()
-    assert len(riwayat_items) > 0
-    assert any(r["event_type"] == "penerimaan" for r in riwayat_items)
 

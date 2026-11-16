@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Penerimaan Paket Linen - Client Rumah Sakit</title>
+  <link rel="stylesheet" href="/static/styles.css?v=35" />
+  <style>
+    body, .app-layout { background-color: #020b14 !important; color: #e6f0fa; }
+    .card { background: #0B2038; border: 1px solid #173554; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .badge-secondary { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+    .badge-info { background: #0c4a6e; color: #38bdf8; border: 1px solid #0284c7; }
+    .badge-success { background: #064e3b; color: #34d399; border: 1px solid #059669; }
+    .badge-warning { background: #78350f; color: #fbbf24; border: 1px solid #d97706; }
+    .badge-danger { background: #7f1d1d; color: #f87171; border: 1px solid #dc2626; }
+    .badge-primary { background: #1e3a8a; color: #93c5fd; border: 1px solid #2563eb; }
+    .btn { padding: 8px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; font-size: 0.85rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-primary { background: #0284c7; color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #0369a1; }
+    .btn-success { background: #059669; color: #fff; }
+    .btn-success:hover:not(:disabled) { background: #047857; }
+    .btn-warning { background: #d97706; color: #fff; }
+    .btn-warning:hover:not(:disabled) { background: #b45309; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+    .form-label { font-size: 0.8rem; color: #94a3b8; font-weight: 600; }
+    .form-input { background: #071526; border: 1px solid #1e3a5f; color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 0.9rem; }
+    .form-input:focus { outline: none; border-color: #0284c7; }
+    .epc-list { max-height: 220px; overflow-y: auto; background: #05101d; border: 1px solid #142840; border-radius: 8px; padding: 8px; font-family: monospace; font-size: 0.8rem; }
+    .epc-item { padding: 4px 8px; border-bottom: 1px solid #0d1e33; display: flex; justify-content: space-between; }
+    .alert-banner { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 10px; }
+    .alert-gate-locked { background: #3b1d1d; border: 1px solid #dc2626; color: #fca5a5; }
+    .alert-gate-active { background: #064e3b; border: 1px solid #059669; color: #a7f3d0; }
+    .alert-warning { background: #451a03; border: 1px solid #d97706; color: #fde68a; }
+    .table-history { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 10px; }
+    .table-history th, .table-history td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #173554; }
+    .table-history th { color: #8297b0; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <span class="brand-title">Client RS</span>
+          <span class="brand-subtitle">Linen Tracking</span>
+        </div>
+      </div>
+      <div class="sidebar-menu-label">MENU</div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard" class="nav-item">
+          <span>Dashboard</span>
+        </a>
+        <a href="/master-data" class="nav-item">
+          <span>Master Data</span>
+        </a>
+        <a href="/laundry" class="nav-item">
+          <span>Laundry</span>
+        </a>
+        <a href="/penerimaan" class="nav-item active">
+          <span>Penerimaan Paket</span>
+        </a>
+        <a href="/settings" class="nav-item">
+          <span>Settings</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content" style="padding: 24px; overflow-y: auto;">
+      <!-- TOPBAR / HOSPITAL BADGE -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+          <h1 style="font-size: 1.4rem; font-weight: 800; margin: 0; color: #fff;">Penerimaan Paket Linen Supplier</h1>
+          <p style="color: #8297b0; font-size: 0.85rem; margin: 4px 0 0 0;">Verifikasi fisik RFID, konsensus claim cloud, dan pencatatan transaksi lokal</p>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <div id="hospital-badge" class="badge badge-primary">
+            <span id="hospital-info-text">RS Memuat...</span>
+          </div>
+          <div id="reader-status-badge" class="badge badge-secondary">
+            <span id="reader-status-text">RFID: Standby</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FEATURE GATE BANNER -->
+      <div id="gate-banner" class="alert-banner alert-gate-locked">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        <span id="gate-banner-text">Memeriksa status Feature Gate...</span>
+      </div>
+
+      <!-- OPERASI TERTAHAN / BLOCKED ALERT -->
+      <div id="held-alert" class="alert-banner alert-warning" style="display: none;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <div id="held-alert-text">Operasi tertahan membutuhkan rekonsiliasi. Pembuatan operasi baru diblokir.</div>
+      </div>
+
+      <!-- 3 STATS OVERVIEW -->
+      <div class="grid-3">
+        <div class="card">
+          <span style="color: #8297b0; font-size: 0.8rem; font-weight: 600;">STATUS LIFECYCLE</span>
+          <div style="margin-top: 8px;">
+            <span id="lifecycle-badge" class="badge badge-secondary">MENUNGGU PEMINDAIAN</span>
+          </div>
+        </div>
+        <div class="card">
+          <span style="color: #8297b0; font-size: 0.8rem; font-weight: 600;">KECOCOKAN MANIFEST</span>
+          <div style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
+            <span id="manifest-match-text" style="font-size: 1.1rem; font-weight: 700; color: #fff;">0 / 0 Linen</span>
+            <span id="manifest-match-badge" class="badge badge-secondary">0%</span>
+          </div>
+        </div>
+        <div class="card">
+          <span style="color: #8297b0; font-size: 0.8rem; font-weight: 600;">TRANSAKSI LOKAL</span>
+          <div style="margin-top: 8px;">
+            <span id="local-commit-text" style="font-size: 1.1rem; font-weight: 700; color: #94a3b8;">Belum Tersimpan</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN WORKFLOW GRID -->
+      <div class="grid-2">
+        <!-- LEFT: INPUT & PEMINDAIAN -->
+        <div class="card">
+          <h2 style="font-size: 1.05rem; font-weight: 700; margin: 0 0 16px 0; color: #fff;">1. Identifikasi Paket & Scan RFID</h2>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">ID Paket Linen</label>
+              <input type="number" id="input-paket-id" class="form-input" placeholder="Contoh: 101" value="101" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Kode Verifikasi (Surat Jalan)</label>
+              <input type="text" id="input-verif-code" class="form-input" placeholder="Contoh: VC-101" value="VC-101" />
+            </div>
+          </div>
+
+          <div style="margin-bottom: 16px;">
+            <button id="btn-fetch-package" class="btn btn-primary" onclick="fetchPackageManifest()">
+              <span>Ambil Manifest Cloud</span>
+            </button>
+          </div>
+
+          <!-- RFID CONTROLS -->
+          <div style="border-top: 1px solid #173554; padding-top: 14px; margin-top: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <span style="font-size: 0.85rem; font-weight: 600; color: #e6f0fa;">Bukti Fisik RFID Reader</span>
+              <span id="scan-state-indicator" class="badge badge-secondary">STANDBY</span>
+            </div>
+            <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+              <button id="btn-start-scan" class="btn btn-primary" onclick="startScan()" disabled>
+                <span>Mulai Scan</span>
+              </button>
+              <button id="btn-stop-scan" class="btn btn-warning" onclick="stopScan()" disabled>
+                <span>Kunci Snapshot</span>
+              </button>
+            </div>
+            <div class="epc-list" id="epc-list-container">
+              <div style="color: #64748b; text-align: center; padding: 20px;">Belum ada EPC dipindai.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: PROSES LIFECYCLE & SUMMARY -->
+        <div class="card">
+          <h2 style="font-size: 1.05rem; font-weight: 700; margin: 0 0 16px 0; color: #fff;">2. Validasi & Komit Penerimaan</h2>
+
+          <div style="background: #071526; border: 1px solid #173554; border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem;">
+              <span style="color: #8297b0;">Operation ID:</span>
+              <span id="text-op-id" style="font-family: monospace; color: #fff;">-</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem;">
+              <span style="color: #8297b0;">Status Claim Cloud:</span>
+              <span id="text-claim-status" class="badge badge-secondary">BELUM CLAIM</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem;">
+              <span style="color: #8297b0;">Status Commit SQLite:</span>
+              <span id="text-local-status" class="badge badge-secondary">BELUM COMMIT</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+              <span style="color: #8297b0;">Status Confirm Cloud:</span>
+              <span id="text-confirm-status" class="badge badge-secondary">BELUM CONFIRM</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Ruangan Tujuan Penyimpanan</span>
+              <small id="ruangan-info-badge" style="color: #00D4FF; font-size: 0.75rem;">(Hanya Ruangan Aktif)</small>
+            </label>
+            <select id="select-ruangan" class="form-input" style="background: #0a192f; color: #fff; border: 1px solid #1e3a5f; cursor: pointer;">
+              <option value="" disabled selected>Memuat daftar ruangan aktif...</option>
+            </select>
+            <div id="ruangan-empty-alert" style="display: none; margin-top: 6px; padding: 8px 12px; border-radius: 6px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; font-size: 0.8rem;">
+              ⚠️ Tidak ada master ruangan aktif di database lokal. Tambahkan atau aktifkan master ruangan terlebih dahulu sebelum memproses penerimaan paket.
+            </div>
+          </div>
+
+          <div style="margin-top: 16px;">
+            <button id="btn-process-receiving" class="btn btn-success" style="width: 100%; justify-content: center; padding: 12px;" onclick="processPackageReceiving()" disabled>
+              <span>Proses Penerimaan (Claim & Komit Lokal)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIWAYAT OPERASI LOKAL TABLE -->
+      <div class="card" style="margin-top: 20px;">
+        <h2 style="font-size: 1.05rem; font-weight: 700; margin: 0 0 10px 0; color: #fff;">Riwayat Status Operasi Paket (Audit Database SQLite)</h2>
+        <div style="overflow-x: auto;">
+          <table class="table-history">
+            <thead>
+              <tr>
+                <th>Operation ID</th>
+                <th>Paket ID</th>
+                <th>Phase Lifecycle</th>
+                <th>Sync State</th>
+                <th>Transaksi ID</th>
+                <th>Scan Count</th>
+                <th>Waktu Dibuat</th>
+              </tr>
+            </thead>
+            <tbody id="history-table-body">
+              <tr>
+                <td colspan="7" style="text-align: center; color: #64748b;">Pilih paket untuk melihat riwayat operasi.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let activeOperationId = null;
+    let activeManifestItems = [];
+    let isFeatureGateActive = false;
+
+    // 1. Inisialisasi: Cek status Feature Gate dan Info Sesi
+    async function initPage() {
+      await loadActiveRooms();
+      try {
+        const res = await fetch("/api/receiving/feature-status");
+        const data = await res.json();
+        isFeatureGateActive = data.feature_gate_enabled;
+        const banner = document.getElementById("gate-banner");
+        const bannerText = document.getElementById("gate-banner-text");
+
+        if (isFeatureGateActive) {
+          banner.className = "alert-banner alert-gate-active";
+          bannerText.textContent = "Feature Gate Aktif: Lingkungan Uji Terisolasi (Non-Operasional).";
+        } else {
+          banner.className = "alert-banner alert-gate-locked";
+          bannerText.textContent = "Fitur Penerimaan Paket Terkunci (Feature Gate Nonaktif). Akses belum dibuka untuk operasional.";
+        }
+      } catch (err) {
+        console.error("Gagal memeriksa feature gate:", err);
+      }
+
+      // Ambil status RFID
+      try {
+        const rfidRes = await fetch("/api/rfid/status");
+        if (rfidRes.ok) {
+          const rfidData = await rfidRes.json();
+          document.getElementById("reader-status-text").textContent = `RFID: ${rfidData.status.toUpperCase()} (${rfidData.active_reader || "COM"})`;
+        }
+      } catch (_) {}
+    }
+
+    // 2. Ambil metadata manifest paket
+    async function fetchPackageManifest() {
+      const paketId = document.getElementById("input-paket-id").value;
+      if (!paketId) return alert("Masukkan ID Paket");
+
+      try {
+        const res = await fetch(`/api/receiving/package/${paketId}`);
+        if (!res.ok) {
+          const err = await res.json();
+          alert(`Gagal mengambil paket: ${err.detail}`);
+          return;
+        }
+        const data = await res.json();
+        activeManifestItems = data.manifest_items || [];
+        document.getElementById("manifest-match-text").textContent = `0 / ${activeManifestItems.length} Linen`;
+        
+        // Aktifkan tombol mulai scan
+        document.getElementById("btn-start-scan").disabled = !isFeatureGateActive;
+        
+        // Load riwayat operasi paket
+        loadOperationHistory(paketId);
+      } catch (err) {
+        alert("Terjadi kesalahan koneksi saat mengambil manifest.");
+      }
+    }
+
+    // 3. Mulai Sesi Scan RFID di Backend
+    async function startScan() {
+      const paketId = document.getElementById("input-paket-id").value;
+      try {
+        const res = await fetch("/api/receiving/scan/start", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-ClientS-Request": "1" },
+          body: JSON.stringify({ paket_id: parseInt(paketId), operation_id: activeOperationId })
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          if (res.status === 409) {
+            showHeldAlert(err.detail);
+          }
+          alert(`Gagal memulai scan: ${err.detail}`);
+          return;
+        }
+        const data = await res.json();
+        activeOperationId = data.operation_id;
+        document.getElementById("text-op-id").textContent = activeOperationId;
+        setLifecycleBadge("PEMINDAIAN BERLANGSUNG", "badge-info");
+        document.getElementById("scan-state-indicator").textContent = "SCANNING";
+        document.getElementById("scan-state-indicator").className = "badge badge-info";
+
+        document.getElementById("btn-start-scan").disabled = true;
+        document.getElementById("btn-stop-scan").disabled = false;
+
+        // Polling scan session status
+        pollScanSession(paketId);
+      } catch (err) {
+        alert("Gagal menghubungi server untuk memulai scan.");
+      }
+    }
+
+    // 4. Kunci Snapshot Scan RFID
+    async function stopScan() {
+      const paketId = document.getElementById("input-paket-id").value;
+      try {
+        const res = await fetch("/api/receiving/scan/stop", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-ClientS-Request": "1" },
+          body: JSON.stringify({ paket_id: parseInt(paketId), operation_id: activeOperationId })
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          alert(`Gagal mengunci snapshot: ${err.detail}`);
+          return;
+        }
+        const data = await res.json();
+        document.getElementById("scan-state-indicator").textContent = "FROZEN";
+        document.getElementById("scan-state-indicator").className = "badge badge-success";
+        document.getElementById("btn-stop-scan").disabled = true;
+
+        // Render hasil scan
+        renderEPCList(data.scanned_epcs);
+        validateManifestMatch(data.scanned_epcs);
+      } catch (err) {
+        alert("Gagal mengunci snapshot.");
+      }
+    }
+
+    // Helper: Ambil master data ruangan aktif lokal untuk transaksi baru
+    async function loadActiveRooms() {
+      const select = document.getElementById("select-ruangan");
+      const emptyAlert = document.getElementById("ruangan-empty-alert");
+      if (!select) return;
+      try {
+        const res = await fetch("/api/master/ruangan?is_active=true", {
+          credentials: "same-origin",
+          headers: { "X-ClientS-Request": "1" }
+        });
+        if (!res.ok) throw new Error("Gagal mengambil master data ruangan.");
+        const rooms = await res.json();
+        if (!rooms || rooms.length === 0) {
+          select.innerHTML = '<option value="" disabled selected>-- Tidak ada ruangan aktif terdaftar --</option>';
+          select.disabled = true;
+          if (emptyAlert) emptyAlert.style.display = "block";
+          const btn = document.getElementById("btn-process-receiving");
+          if (btn) btn.disabled = true;
+          return;
+        }
+        if (emptyAlert) emptyAlert.style.display = "none";
+        select.disabled = false;
+        select.innerHTML = rooms.map((r, idx) => `<option value="${r.nama_ruangan}" ${idx === 0 ? "selected" : ""}>${r.kode_ruangan} - ${r.nama_ruangan}</option>`).join("");
+      } catch (err) {
+        console.error("Gagal memuat ruangan aktif:", err);
+        select.innerHTML = '<option value="" disabled selected>Error memuat ruangan</option>';
+        select.disabled = true;
+      }
+    }
+
+    // 5. Eksekusi Proses Penerimaan Paket
+    async function processPackageReceiving() {
+      const paketId = document.getElementById("input-paket-id").value;
+      const verifCode = document.getElementById("input-verif-code").value;
+      const selectRuangan = document.getElementById("select-ruangan");
+      const ruangan = selectRuangan ? selectRuangan.value : "";
+
+      if (!ruangan) {
+        alert("Pilih ruangan tujuan aktif terlebih dahulu.");
+        return;
+      }
+
+      setLifecycleBadge("CLAIM SEDANG DIPROSES", "badge-warning");
+      document.getElementById("text-claim-status").textContent = "CLAIMING";
+      document.getElementById("text-claim-status").className = "badge badge-warning";
+      document.getElementById("btn-process-receiving").disabled = true;
+
+      try {
+        const res = await fetch("/api/receiving/process", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-ClientS-Request": "1" },
+          body: JSON.stringify({
+            paket_id: parseInt(paketId),
+            verification_code: verifCode,
+            operation_id: activeOperationId,
+            ruangan_tujuan: ruangan
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          setLifecycleBadge("OPERASI DITOLAK", "badge-danger");
+          alert(`Penerimaan Gagal: ${data.detail}`);
+          loadOperationHistory(paketId);
+          return;
+        }
+
+        if (data.lifecycle_phase === "confirmed") {
+          setLifecycleBadge("BERHASIL DIKONFIRMASI", "badge-success");
+          document.getElementById("text-claim-status").textContent = "CLAIM VERIFIED";
+          document.getElementById("text-claim-status").className = "badge badge-success";
+          document.getElementById("text-local-status").textContent = `TRX ID: ${data.transaksi_id || "OK"}`;
+          document.getElementById("text-local-status").className = "badge badge-success";
+          document.getElementById("text-confirm-status").textContent = "CONFIRMED";
+          document.getElementById("text-confirm-status").className = "badge badge-success";
+          document.getElementById("local-commit-text").textContent = `Selesai (TRX #${data.transaksi_id})`;
+          document.getElementById("local-commit-text").style.color = "#34d399";
+        } else if (data.lifecycle_phase === "claim_held_reconciliation") {
+          setLifecycleBadge("TERTAHAN REKONSILIASI", "badge-danger");
+          showHeldAlert("Operasi tertahan dalam status claim_held_reconciliation setelah restart backend.");
+        }
+
+        loadOperationHistory(paketId);
+      } catch (err) {
+        alert("Kesalahan jaringan saat memproses penerimaan.");
+      }
+    }
+
+    // Helper functions
+    function setLifecycleBadge(text, className) {
+      const badge = document.getElementById("lifecycle-badge");
+      badge.textContent = text;
+      badge.className = `badge ${className}`;
+    }
+
+    function showHeldAlert(msg) {
+      const el = document.getElementById("held-alert");
+      document.getElementById("held-alert-text").textContent = msg;
+      el.style.display = "flex";
+      setLifecycleBadge("TERTAHAN REKONSILIASI", "badge-danger");
+      document.getElementById("btn-start-scan").disabled = true;
+      document.getElementById("btn-stop-scan").disabled = true;
+      document.getElementById("btn-process-receiving").disabled = true;
+    }
+
+    function renderEPCList(epcs) {
+      const c = document.getElementById("epc-list-container");
+      if (!epcs || epcs.length === 0) {
+        c.innerHTML = '<div style="color: #64748b; text-align: center; padding: 20px;">0 EPC Terdeteksi.</div>';
+        return;
+      }
+      c.innerHTML = epcs.map((e, idx) => `
+        <div class="epc-item">
+          <span>${idx + 1}. ${e}</span>
+          <span style="color: #34d399;">✓ Terbaca</span>
+        </div>
+      `).join("");
+    }
+
+    function validateManifestMatch(scannedEpcs) {
+      const manifestEpcs = activeManifestItems.map(m => m.epc);
+      const scannedSet = new Set(scannedEpcs);
+      const manifestSet = new Set(manifestEpcs);
+
+      const isExactMatch = scannedEpcs.length === manifestEpcs.length && 
+                           manifestEpcs.every(e => scannedSet.has(e));
+
+      const matchText = document.getElementById("manifest-match-text");
+      const matchBadge = document.getElementById("manifest-match-badge");
+
+      matchText.textContent = `${scannedEpcs.length} / ${manifestEpcs.length} Linen`;
+      if (isExactMatch) {
+        matchBadge.textContent = "100% Cocok";
+        matchBadge.className = "badge badge-success";
+        setLifecycleBadge("VALIDASI BERHASIL", "badge-success");
+        document.getElementById("btn-process-receiving").disabled = !isFeatureGateActive;
+      } else {
+        matchBadge.textContent = "Mismatch";
+        matchBadge.className = "badge badge-danger";
+        setLifecycleBadge("MISMATCH", "badge-danger");
+        document.getElementById("btn-process-receiving").disabled = true;
+      }
+    }
+
+    async function loadOperationHistory(paketId) {
+      try {
+        const res = await fetch(`/api/receiving/operations/${paketId}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const tbody = document.getElementById("history-table-body");
+        if (!data.operations || data.operations.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #64748b;">Belum ada riwayat operasi untuk paket ini.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = data.operations.map(op => `
+          <tr>
+            <td style="font-family: monospace;">${op.operation_id}</td>
+            <td>${op.paket_id}</td>
+            <td><span class="badge ${op.lifecycle_phase === 'confirmed' ? 'badge-success' : 'badge-warning'}">${op.lifecycle_phase}</span></td>
+            <td>${op.sync_state}</td>
+            <td>${op.transaksi_id || '-'}</td>
+            <td>${op.scan_count}</td>
+            <td>${op.created_at || '-'}</td>
+          </tr>
+        `).join("");
+      } catch (_) {}
+    }
+
+    window.addEventListener("DOMContentLoaded", initPage);
+  </script>
+</body>
+</html>
+
